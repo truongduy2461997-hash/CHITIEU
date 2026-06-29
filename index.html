@@ -1,0 +1,4006 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sổ quản lý thẻ - vay - tiết kiệm</title>
+<style>
+:root{
+  --bg:#f4f7fb;--card:#fff;--text:#182230;--muted:#667085;--line:#d9e2ec;
+  --blue:#0757a3;--blue2:#0b6fc6;--green:#079455;--red:#d92d20;--orange:#f79009;
+  --shadow:0 8px 22px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{background:linear-gradient(135deg,var(--blue),#06386d);color:#fff;padding:16px 14px;box-shadow:var(--shadow);position:sticky;top:0;z-index:50}
+.header-inner{max-width:1240px;margin:auto;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+h1{margin:0 0 4px;font-size:21px;font-weight:900}
+.sub{font-size:13px;opacity:.9;line-height:1.4}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+.month-toolbar{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding:11px 12px;
+  margin:0 0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.month-toolbar .toolbar-label{font-size:13px;font-weight:900;color:var(--blue);text-transform:uppercase}
+.month-toolbar .toolbar-hint{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
+.month-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.month-controls select.month{border:1px solid var(--line);box-shadow:0 2px 7px rgba(16,24,40,.06)}
+.month-controls button.primary{border-radius:11px;padding:9px 11px;font-weight:900}
+.month-pill{
+  display:inline-block;
+  margin-left:8px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#d1e9ff;
+  color:#175cd3;
+  font-size:11px;
+  font-weight:900;
+}
+select,button,input,textarea{font-family:inherit}
+button,select.month{border:0;border-radius:11px;padding:9px 11px;font-weight:800}
+button{background:#fff;color:var(--blue);cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:#12b76a;color:#fff}
+button.danger{background:#fee4e2;color:#b42318}
+select.month{background:#fff;color:var(--blue);min-width:128px}
+main{max-width:1240px;margin:auto;padding:12px 10px 28px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}
+.tab-btn{border:1px solid var(--line);background:#fff;color:#344054;box-shadow:none}
+.tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tab{display:none}.tab.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);padding:12px}
+.kpi .label{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.kpi .value{font-size:24px;font-weight:900;margin-top:7px}
+.kpi .hint{font-size:12px;color:var(--muted);margin-top:3px}
+.kpi.red .value,.redtxt{color:var(--red)}.kpi.green .value,.greentxt{color:var(--green)}.kpi.orange .value,.orangetxt{color:var(--orange)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.panel h2{font-size:16px;margin:0;padding:12px 13px;background:#f8fbff;border-bottom:1px solid var(--line)}
+.panel .body{padding:12px 13px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{border-bottom:1px solid var(--line);padding:8px 7px;text-align:left;font-size:13px;vertical-align:middle}
+th{background:#f8fbff;color:#344054;font-weight:900;position:sticky;top:0;z-index:1}
+th.num,td.num{text-align:right} th.center,td.center{text-align:center}
+input.cell,select.cell,textarea.cell{
+  width:100%;
+  border:1.6px solid #98c9f5;
+  background:#f0f8ff;
+  border-radius:8px;
+  padding:6px 7px;
+  font-size:13px;
+  color:var(--text);
+  box-shadow:inset 0 0 0 1px rgba(11,111,198,.08);
+}
+input.cell:hover,select.cell:hover,textarea.cell:hover{
+  border-color:#0b6fc6;
+  background:#e8f4ff;
+}
+input.cell:focus,select.cell:focus,textarea.cell:focus{
+  outline:none;
+  border-color:#0757a3;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(11,111,198,.18);
+}
+input.cell::placeholder,textarea.cell::placeholder{color:#98a2b3}
+td:has(input.cell),td:has(select.cell),td:has(textarea.cell){
+  background:linear-gradient(0deg,rgba(240,248,255,.55),rgba(240,248,255,.55));
+}
+.edit-hint{
+  display:inline-block;
+  margin-left:8px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#d1e9ff;
+  color:#175cd3;
+  font-size:11px;
+  font-weight:900;
+}
+input.money{text-align:right}
+textarea.free-note{
+  min-height:56px;
+  resize:vertical;
+  line-height:1.35;
+}
+input[type="date"].cell{
+  min-width:138px;
+  cursor:pointer;
+}
+.date-field{
+  width:162px;
+  min-width:162px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  border:1.6px solid #98c9f5;
+  background:#f0f8ff;
+  border-radius:8px;
+  box-shadow:inset 0 0 0 1px rgba(11,111,198,.08);
+  overflow:hidden;
+}
+.date-field:focus-within{
+  border-color:#0757a3;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(11,111,198,.18);
+}
+.date-field .date-text{
+  flex:1;
+  min-width:0;
+  height:32px;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  text-align:center;
+  padding:6px 4px;
+}
+.date-field .date-text:focus{
+  outline:none;
+  box-shadow:none !important;
+}
+.date-field .date-btn{
+  width:34px;
+  min-width:34px;
+  height:32px;
+  border:0;
+  border-left:1px solid #b9daf7;
+  border-radius:0;
+  background:transparent;
+  color:#175cd3;
+  padding:0;
+  cursor:pointer;
+  font-size:15px;
+}
+.date-field .date-native{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:900;white-space:nowrap}
+.badge.red{background:#fee4e2;color:#b42318}.badge.orange{background:#fef0c7;color:#b54708}
+.badge.green{background:#dcfae6;color:#067647}.badge.blue{background:#d1e9ff;color:#175cd3}
+.note{font-size:13px;color:var(--muted);line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.alert{padding:9px 11px;border-radius:11px;border:1px solid;margin:7px 0;font-size:13px;line-height:1.45}
+.alert.red{background:#fff5f5;color:#912018;border-color:#fecdca}
+.alert.orange{background:#fffaeb;color:#93370d;border-color:#fedf89}
+.alert.green{background:#ecfdf3;color:#05603a;border-color:#abefc6}
+
+.due-alert-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.due-alert-item{border:1px solid var(--line);border-radius:13px;padding:9px 10px;background:#f8fbff;line-height:1.35}
+.due-alert-item .top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px}
+.due-alert-item .name{font-weight:900;color:var(--text)}
+.due-alert-item .amount{font-weight:900;color:var(--blue);white-space:nowrap}
+.due-alert-item .meta{font-size:12px;color:var(--muted)}
+.due-alert-item.red{background:#fff5f5;border-color:#fecdca}.due-alert-item.red .meta{color:#912018}.due-alert-item.red .amount{color:#b42318}
+.due-alert-item.orange{background:#fffaeb;border-color:#fedf89}.due-alert-item.orange .meta{color:#93370d}.due-alert-item.orange .amount{color:#b54708}
+.due-alert-item.green{background:#ecfdf3;border-color:#abefc6}.due-alert-item.green .meta{color:#05603a}.due-alert-item.green .amount{color:#067647}
+.due-alert-empty{padding:10px 11px;border:1px solid #abefc6;border-radius:13px;background:#ecfdf3;color:#05603a;font-size:13px;font-weight:800}
+@media(max-width:680px){.due-alert-grid{grid-template-columns:1fr}.due-alert-item{padding:8px 9px}.due-alert-item .top{align-items:flex-start}.due-alert-item .meta{font-size:11.5px}}
+
+.small-btn{font-size:12px;padding:7px 9px;border-radius:9px;background:#eff8ff;color:#175cd3}
+.status-cell, select.status-select{
+  min-width:125px;
+  white-space:nowrap;
+}
+tfoot th, tfoot td{
+  background:#eef6ff;
+  font-weight:900;
+  border-top:2px solid #98c9f5;
+}
+
+#cardPayTable{
+  min-width:0 !important;
+  table-layout:fixed;
+}
+#cardPayTable th,
+#cardPayTable td{
+  white-space:normal;
+  padding:7px 6px;
+}
+#cardPayTable th:nth-child(1), #cardPayTable td:nth-child(1){width:13%}
+#cardPayTable th:nth-child(2), #cardPayTable td:nth-child(2){width:10%}
+#cardPayTable th:nth-child(3), #cardPayTable td:nth-child(3){width:13%}
+#cardPayTable th:nth-child(4), #cardPayTable td:nth-child(4){width:32%}
+#cardPayTable th:nth-child(5), #cardPayTable td:nth-child(5){width:13%}
+#cardPayTable th:nth-child(6), #cardPayTable td:nth-child(6){width:19%}
+#cardPayTable .auto-source{font-weight:800;line-height:1.35;white-space:pre-line;color:#344054}
+#cardPayTable .auto-source .source-line{display:block;width:max-content;max-width:100%;white-space:nowrap;margin:2px 0;padding:3px 7px;border-radius:999px;font-weight:900;cursor:pointer}
+#cardPayTable .auto-source .source-line:focus{outline:2px solid rgba(7,87,163,.35);outline-offset:2px}
+#cardPayTable .auto-source .source-green{background:#dcfae6;color:#067647}
+#cardPayTable .auto-source .source-orange{background:#fef0c7;color:#b54708}
+#cardPayTable .auto-source .source-red{background:#fee4e2;color:#b42318}
+#cardPayTable .auto-source .missing{color:#b42318;font-weight:900;background:#fee4e2}
+#cardPayTable .auto-source .muted{color:#667085;font-weight:700}
+#cardPayTable .auto-source .source-detail{display:none;margin-top:4px;font-size:11px;line-height:1.35;font-weight:700;white-space:normal;color:#344054}
+#cardPayTable .auto-source .source-line.open .source-detail,
+#cardPayTable .auto-source .source-line:hover .source-detail,
+#cardPayTable .auto-source .source-line:focus .source-detail{display:block}
+#cardPayTable .plan-card-name{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:900;white-space:nowrap}
+#cardPayTable .plan-green{background:#dcfae6;color:#067647}
+#cardPayTable .plan-orange{background:#fef0c7;color:#b54708}
+#cardPayTable .plan-red{background:#fee4e2;color:#b42318}
+.fee-action-row{margin-top:7px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.fee-action-row .small-btn{background:#fff;color:#175cd3;border:1px solid #b2ddff}
+.fee-action-row .saved-pill{display:inline-block;border-radius:999px;padding:4px 8px;background:#dcfae6;color:#067647;font-size:12px;font-weight:900}
+.actual-log-box{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.actual-log-title{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:0 0 8px;font-size:13px;font-weight:900;color:var(--blue)}
+#cardActualTable{min-width:920px;table-layout:fixed}
+#cardActualTable th,#cardActualTable td{white-space:normal;padding:7px 5px}
+#cardActualTable th:nth-child(1),#cardActualTable td:nth-child(1){width:16%}
+#cardActualTable th:nth-child(2),#cardActualTable td:nth-child(2){width:20%}
+#cardActualTable th:nth-child(3),#cardActualTable td:nth-child(3){width:13%}
+#cardActualTable th:nth-child(4),#cardActualTable td:nth-child(4){width:18%}
+#cardActualTable th:nth-child(5),#cardActualTable td:nth-child(5){width:15%}
+#cardActualTable th:nth-child(6),#cardActualTable td:nth-child(6){width:18%}
+.actual-fee-pill{display:inline-block;border-radius:999px;padding:4px 8px;background:#fee4e2;color:#b42318;font-weight:900;white-space:nowrap}
+.actual-posted{display:inline-block;border-radius:999px;padding:4px 8px;background:#dcfae6;color:#067647;font-weight:900;white-space:nowrap}
+.actual-empty{padding:10px;text-align:center;color:var(--muted);font-size:13px;background:#f8fbff}
+
+#cardPayTable .status-done{color:#067647;font-weight:900}
+#cardPayTable .status-todo{color:#b42318;font-weight:900}
+#cardPayTable .status-wait{color:#b54708;font-weight:900}
+#cardPayTableWrap{
+  overflow:visible;
+}
+
+#cardsTable{
+  min-width:1120px;
+  table-layout:fixed;
+}
+#cardsTable th:nth-child(1), #cardsTable td:nth-child(1){width:7%}
+#cardsTable th:nth-child(2), #cardsTable td:nth-child(2){width:6%}
+#cardsTable th:nth-child(3), #cardsTable td:nth-child(3){width:8%}
+#cardsTable th:nth-child(4), #cardsTable td:nth-child(4){width:7%}
+#cardsTable th:nth-child(5), #cardsTable td:nth-child(5){width:8%}
+#cardsTable th:nth-child(6), #cardsTable td:nth-child(6){width:9%}
+#cardsTable th:nth-child(7), #cardsTable td:nth-child(7){width:9%}
+#cardsTable th:nth-child(8), #cardsTable td:nth-child(8){width:9%}
+#cardsTable th:nth-child(9), #cardsTable td:nth-child(9){width:9%}
+#cardsTable th:nth-child(10), #cardsTable td:nth-child(10){width:14%}
+#cardsTable th:nth-child(11), #cardsTable td:nth-child(11){width:6%}
+#cardsTable th:nth-child(12), #cardsTable td:nth-child(12){width:8%}
+.avail-info{display:flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.15}
+.avail-info b{display:block;white-space:nowrap}
+.avail-line{display:inline-flex;align-items:center;gap:4px;justify-content:flex-end;white-space:nowrap}
+.avail-info.avail-red b,.avail-info.avail-red small{color:var(--red)}
+.avail-info.avail-orange b,.avail-info.avail-orange small{color:var(--orange)}
+.avail-info.avail-green b,.avail-info.avail-green small{color:var(--green)}
+.history-money{width:112px;min-width:112px;max-width:112px}
+
+#loansTable{
+  min-width:1580px;
+  table-layout:fixed;
+}
+#loansTable th,
+#loansTable td{
+  white-space:normal;
+  vertical-align:middle;
+  padding:7px 5px;
+}
+#loansTable input.cell{
+  padding:5px 6px;
+}
+#loansTable .date-field{
+  width:140px;
+  min-width:140px;
+}
+#loansTable th:nth-child(1), #loansTable td:nth-child(1){width:8%}
+#loansTable th:nth-child(2), #loansTable td:nth-child(2){width:8%}
+#loansTable th:nth-child(3), #loansTable td:nth-child(3){width:5.5%}
+#loansTable th:nth-child(4), #loansTable td:nth-child(4){width:5.5%}
+#loansTable th:nth-child(5), #loansTable td:nth-child(5){width:9%}
+#loansTable th:nth-child(6), #loansTable td:nth-child(6){width:4.5%}
+#loansTable th:nth-child(7), #loansTable td:nth-child(7){width:7%}
+#loansTable th:nth-child(8), #loansTable td:nth-child(8){width:5.5%}
+#loansTable th:nth-child(9), #loansTable td:nth-child(9){width:5.5%}
+#loansTable th:nth-child(10), #loansTable td:nth-child(10){width:5%}
+#loansTable th:nth-child(11), #loansTable td:nth-child(11){width:5.5%}
+#loansTable th:nth-child(12), #loansTable td:nth-child(12){width:6%}
+#loansTable th:nth-child(13), #loansTable td:nth-child(13){width:6%}
+#loansTable th:nth-child(14), #loansTable td:nth-child(14){width:6%}
+#loansTable th:nth-child(15), #loansTable td:nth-child(15){width:5.5%}
+#loansTable th:nth-child(16), #loansTable td:nth-child(16){width:3.5%}
+
+#monthlyExpenseTable{
+  min-width:900px;
+  table-layout:fixed;
+}
+#monthlyExpenseTable th:nth-child(1), #monthlyExpenseTable td:nth-child(1){width:16%}
+#monthlyExpenseTable th:nth-child(2), #monthlyExpenseTable td:nth-child(2){width:34%}
+#monthlyExpenseTable th:nth-child(3), #monthlyExpenseTable td:nth-child(3){width:14%}
+#monthlyExpenseTable th:nth-child(4), #monthlyExpenseTable td:nth-child(4){width:10%}
+#monthlyExpenseTable th:nth-child(5), #monthlyExpenseTable td:nth-child(5){width:18%}
+#monthlyExpenseTable th:nth-child(6), #monthlyExpenseTable td:nth-child(6){width:8%}
+.method-select{min-width:70px;text-align:center;font-weight:900}
+
+#fundTable,
+#expenseTable,
+#huiTable{
+  min-width:0 !important;
+  table-layout:fixed;
+  width:100%;
+}
+#fundTable th,
+#fundTable td,
+#expenseTable th,
+#expenseTable td,
+#huiTable th,
+#huiTable td{
+  white-space:normal;
+  padding:7px 5px;
+}
+#fundTable th:nth-child(1), #fundTable td:nth-child(1){width:18%}
+#fundTable th:nth-child(2), #fundTable td:nth-child(2){width:18%}
+#fundTable th:nth-child(3), #fundTable td:nth-child(3){width:18%}
+#fundTable th:nth-child(4), #fundTable td:nth-child(4){width:34%}
+#fundTable th:nth-child(5), #fundTable td:nth-child(5){width:12%}
+#expenseTable th:nth-child(1), #expenseTable td:nth-child(1){width:36%}
+#expenseTable th:nth-child(2), #expenseTable td:nth-child(2){width:22%}
+#expenseTable th:nth-child(3), #expenseTable td:nth-child(3){width:30%}
+#expenseTable th:nth-child(4), #expenseTable td:nth-child(4){width:12%}
+#huiTable th:nth-child(1), #huiTable td:nth-child(1){width:22%}
+#huiTable th:nth-child(2), #huiTable td:nth-child(2){width:24%}
+#huiTable th:nth-child(3), #huiTable td:nth-child(3){width:42%}
+#huiTable th:nth-child(4), #huiTable td:nth-child(4){width:12%}
+#fundTableWrap,
+#expenseTableWrap,
+#huiTableWrap{
+  overflow-x:hidden !important;
+}
+
+.footer{font-size:12px;color:#98a2b3;text-align:center;margin-top:16px}
+@media(max-width:850px){
+  header{position:relative}.header-inner{display:block}.actions{justify-content:flex-start;margin-top:10px}
+  .month-toolbar{display:block;padding:10px;margin-bottom:10px}
+  .month-controls{justify-content:flex-start;margin-top:9px}
+  .month-controls select.month{flex:1;min-width:150px}
+  .tabs{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}
+  h1{font-size:19px}.kpi .value{font-size:21px}
+}
+@media(max-width:520px){.grid{grid-template-columns:1fr}main{padding:10px 7px 24px}th,td{font-size:12px;padding:7px 5px}}
+
+@media(max-width:680px){
+  body{background:#f3f6fb;}
+  header{position:relative;padding:12px 10px;}
+  .header-inner{display:block;}
+  h1{font-size:17px;line-height:1.25;}
+  .sub{font-size:11.5px;}
+  .actions{margin-top:8px;display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;}
+  .actions button{padding:8px 7px;font-size:12px;border-radius:9px;}
+  #autosaveStatus{font-size:11px;white-space:nowrap;opacity:.95;}
+  main{padding:8px 7px 22px;}
+  .month-toolbar{border-radius:13px;padding:9px 10px;}
+  .month-toolbar .toolbar-label{font-size:11px;}
+  .month-toolbar .toolbar-hint{font-size:10.8px;}
+  .month-controls{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .month-controls select.month{grid-column:1 / -1;width:100%;min-width:0;}
+  .month-controls #newMonth{grid-column:1 / -1;}
+  .tabs{display:flex;gap:7px;overflow-x:auto;grid-template-columns:none;margin:2px 0 10px;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+  .tab-btn{min-width:max-content;padding:9px 10px;font-size:12px;border-radius:11px;}
+  .grid{grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}
+  .kpi{padding:9px 8px;border-radius:13px;}
+  .kpi .label{font-size:10.5px;line-height:1.25;}
+  .kpi .value{font-size:18px;margin-top:4px;line-height:1.15;word-break:break-word;}
+  .kpi .hint{font-size:10.5px;line-height:1.25;}
+  .panel{border-radius:14px;margin-bottom:10px;}
+  .panel h2{font-size:14px;padding:10px 11px;}
+  .panel .body{padding:10px 11px;}
+  .two{grid-template-columns:1fr;gap:9px;}
+
+  #tab1 .table-wrap,
+  #tab3 .table-wrap{overflow:visible!important;}
+  #tab1 table,
+  #tab3 table{min-width:0!important;width:100%!important;table-layout:auto!important;border-collapse:separate;border-spacing:0;}
+  #tab1 thead,
+  #tab1 tfoot,
+  #tab3 thead,
+  #tab3 tfoot{display:none!important;}
+  #tab1 tbody,
+  #tab3 tbody{display:block;width:100%;}
+  #tab1 tr,
+  #tab3 tr{display:block;width:100%;background:#fff;border:1px solid var(--line);border-radius:13px;margin:9px 0;padding:7px 8px;box-shadow:0 4px 12px rgba(16,24,40,.06);}
+  #tab1 td,
+  #tab3 td{display:grid!important;grid-template-columns:38% 62%;align-items:center;gap:8px;width:100%!important;border-bottom:1px dashed #e4eaf2!important;padding:7px 0!important;text-align:left!important;white-space:normal!important;background:transparent!important;}
+  #tab1 td:last-child,
+  #tab3 td:last-child{border-bottom:0!important;}
+  #tab1 td::before,
+  #tab3 td::before{content:"";font-size:11px;font-weight:900;color:#667085;line-height:1.2;}
+  #tab1 td > *,
+  #tab3 td > *{min-width:0;}
+  #tab1 input.cell,
+  #tab1 select.cell,
+  #tab1 textarea.cell,
+  #tab3 input.cell,
+  #tab3 select.cell,
+  #tab3 textarea.cell{height:36px;font-size:13px;padding:7px 8px;border-radius:9px;}
+  #tab1 input.money,
+  #tab3 input.money{text-align:right;}
+  #tab1 .badge,
+  #tab3 .badge{font-size:11px;padding:3px 7px;}
+  #tab1 .date-field,
+  #tab3 .date-field{width:100%!important;min-width:0!important;height:36px;}
+  #tab1 .date-field .date-text,
+  #tab1 .date-field .date-btn,
+  #tab3 .date-field .date-text,
+  #tab3 .date-field .date-btn{display:none!important;}
+  #tab1 .date-field .date-native,
+  #tab3 .date-field .date-native{position:static!important;opacity:1!important;pointer-events:auto!important;width:100%!important;height:34px!important;border:0!important;background:transparent!important;padding:0 7px!important;color:var(--text)!important;font-size:13px!important;}
+
+  #cardsTable td:nth-child(1)::before{content:"Thẻ";}
+  #cardsTable td:nth-child(2)::before{content:"Ngày chốt";}
+  #cardsTable td:nth-child(3)::before{content:"Ngày TT mặc định";}
+  #cardsTable td:nth-child(4)::before{content:"Miễn lãi";}
+  #cardsTable td:nth-child(5)::before{content:"Hạn mức";}
+  #cardsTable td:nth-child(6)::before{content:"Dư nợ";}
+  #cardsTable td:nth-child(7)::before{content:"HM còn lại";}
+  #cardsTable td:nth-child(8)::before{content:"Số tiền TT";}
+  #cardsTable td:nth-child(9)::before{content:"Đã thanh toán";}
+  #cardsTable td:nth-child(10)::before{content:"Ngày TT";}
+  #cardsTable td:nth-child(11)::before{content:"Ngày Rút";}
+  #cardsTable td:nth-child(12)::before{content:"Trạng thái";}
+  #cardsTable td:nth-child(7){grid-template-columns:38% 62%;}
+  #cardsTable td:nth-child(7) b{font-size:13px;}
+
+  #cardPayTable td:nth-child(1)::before{content:"Ngày TT";}
+  #cardPayTable td:nth-child(2)::before{content:"Thẻ";}
+  #cardPayTable td:nth-child(3)::before{content:"Số tiền";}
+  #cardPayTable td:nth-child(4)::before{content:"Nguồn đề xuất";}
+  #cardPayTable td:nth-child(5)::before{content:"Trạng thái";}
+  #cardPayTable td:nth-child(6)::before{content:"Ghi thực tế";}
+
+  #loansTable td:nth-child(1)::before{content:"Khoản vay";}
+  #loansTable td:nth-child(2)::before{content:"Người vay";}
+  #loansTable td:nth-child(3)::before{content:"Số tiền vay";}
+  #loansTable td:nth-child(4)::before{content:"Dư nợ";}
+  #loansTable td:nth-child(5)::before{content:"Ngày vay";}
+  #loansTable td:nth-child(6)::before{content:"Thời hạn";}
+  #loansTable td:nth-child(7)::before{content:"Ngày đến hạn";}
+  #loansTable td:nth-child(8)::before{content:"LS năm";}
+  #loansTable td:nth-child(9)::before{content:"LS tháng";}
+  #loansTable td:nth-child(10)::before{content:"Tháng đã TT";}
+  #loansTable td:nth-child(11)::before{content:"Đã TT gốc";}
+  #loansTable td:nth-child(12)::before{content:"Lãi/tháng";}
+  #loansTable td:nth-child(13)::before{content:"Lãi đã TT";}
+  #loansTable td:nth-child(14)::before{content:"Tổng đã TT";}
+  #loansTable td:nth-child(15)::before{content:"Trả tháng";}
+  #loansTable td:nth-child(16)::before{content:"Xóa";}
+
+  #monthlyExpenseTable td:nth-child(1)::before{content:"Ngày chi";}
+  #monthlyExpenseTable td:nth-child(2)::before{content:"Khoản chi";}
+  #monthlyExpenseTable td:nth-child(3)::before{content:"Số tiền";}
+  #monthlyExpenseTable td:nth-child(4)::before{content:"CK/TM/Thẻ";}
+  #monthlyExpenseTable td:nth-child(5)::before{content:"Ghi chú";}
+  #monthlyExpenseTable td:nth-child(6)::before{content:"Xóa";}
+  #monthlyBudgetInput{width:100%!important;margin-top:6px;}
+}
+@media(max-width:390px){
+  .grid{grid-template-columns:1fr;}
+  #tab1 td,#tab3 td{grid-template-columns:40% 60%;gap:6px;}
+}
+
+.tab3-switch{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.tab3-sub{border:1px solid var(--line);background:#fff;color:#344054;box-shadow:none}
+.tab3-sub.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tab3-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:10px;align-items:end}
+.tab3-inputs label{display:block;font-size:13px;color:var(--text)}
+.tab3-inputs b{display:block;margin-bottom:5px}
+
+.income-extra-box{margin-top:10px;border:1px solid var(--line);border-radius:13px;background:#f8fbff;overflow:hidden}
+.income-extra-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-bottom:1px solid var(--line)}
+.income-extra-head b{font-size:13px;color:var(--blue)}
+.income-extra-box.is-empty{border:0;background:transparent;overflow:visible;margin-top:9px}
+.income-extra-box.is-empty .income-extra-head{border:0;padding:0;justify-content:flex-start}
+.income-extra-box.is-empty .income-extra-head b{display:none}
+.income-extra-box.is-empty .table-wrap{display:none}
+#monthlyIncomeTable{min-width:720px;table-layout:fixed}
+#monthlyIncomeTable th:nth-child(1),#monthlyIncomeTable td:nth-child(1){width:18%}
+#monthlyIncomeTable th:nth-child(2),#monthlyIncomeTable td:nth-child(2){width:30%}
+#monthlyIncomeTable th:nth-child(3),#monthlyIncomeTable td:nth-child(3){width:18%}
+#monthlyIncomeTable th:nth-child(4),#monthlyIncomeTable td:nth-child(4){width:24%}
+#monthlyIncomeTable th:nth-child(5),#monthlyIncomeTable td:nth-child(5){width:10%}
+.history-top{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.history-stat{border:1px solid var(--line);border-radius:12px;padding:9px;background:#f8fbff}
+.history-stat .label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase}
+.history-stat .value{font-size:18px;font-weight:900;margin-top:4px}
+.chart-legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 10px;font-size:12px;color:var(--muted);font-weight:800}
+.legend-dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:4px}.legend-salary{background:#079455}.legend-ck{background:#0b6fc6}.legend-tm{background:#f79009}.legend-card{background:#7a5af8}.legend-debt{background:#7a5af8}.legend-spent{background:#d92d20}
+.chart-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px;margin-bottom:10px;-webkit-overflow-scrolling:touch}
+.bar-chart{min-width:620px;height:240px;display:flex;align-items:flex-end;gap:14px;padding:14px 8px 6px;border-bottom:1px solid #e7eef8;background:linear-gradient(180deg,#fff,#f8fbff)}
+.chart-group{width:82px;min-width:82px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.chart-bars{height:170px;display:flex;align-items:flex-end;gap:7px;width:100%;justify-content:center}
+.chart-bar{width:18px;border-radius:6px 6px 2px 2px;min-height:2px;position:relative}.chart-bar.salary{background:#079455}.chart-bar.debt{background:#7a5af8}.chart-bar.spent{background:#d92d20}
+.chart-stack{width:22px;min-height:2px;border-radius:6px 6px 2px 2px;overflow:hidden;display:flex;flex-direction:column-reverse;background:#eef2f7}.chart-seg{width:100%;min-height:0}.chart-seg.ck{background:#0b6fc6}.chart-seg.tm{background:#f79009}.chart-seg.card{background:#7a5af8}
+.chart-label{font-size:11px;font-weight:900;color:#344054;white-space:nowrap}.chart-value{display:none}
+.history-empty{padding:18px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:12px;background:#f8fbff}
+@media(max-width:850px){
+  .tab3-inputs{grid-template-columns:1fr 1fr;gap:7px}.history-top{grid-template-columns:1fr 1fr}.history-stat{padding:7px}.history-stat .value{font-size:15px}.tab3-switch{gap:6px}.tab3-sub{padding:7px 9px;font-size:12px}.bar-chart{min-width:640px;height:210px}.chart-bars{height:145px}.chart-group{width:76px;min-width:76px}
+}
+@media(max-width:390px){.tab3-inputs{grid-template-columns:1fr}.history-top{grid-template-columns:1fr 1fr}.chart-wrap{padding:8px}.bar-chart{min-width:620px}}
+
+#monthlyExpenseTable .money{max-width:110px;margin-left:auto;}
+#monthlyExpenseTable .method-select{max-width:92px;margin:auto;}
+#monthlyExpenseTable td:nth-child(2) input.cell{min-width:210px;}
+@media(max-width:680px){
+  #monthlyExpenseTable .money{max-width:100%;}
+  #monthlyExpenseTable .method-select{max-width:100%;}
+}
+
+#tab3 > .tab3-kpi-row{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+#fundTable tfoot th,
+#fundTable tfoot td,
+#expenseTable tfoot th,
+#expenseTable tfoot td,
+#huiTable tfoot th,
+#huiTable tfoot td{
+  background:#eef6ff;
+  font-weight:900;
+  border-top:2px solid #98c9f5;
+  color:var(--text);
+}
+#fundTotalAll,
+#expenseTotalAmount,
+#huiDetailTotal{
+  color:var(--blue);
+}
+@media(max-width:850px){
+  #tab3 > .tab3-kpi-row{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    gap:7px!important;
+    padding-bottom:4px!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  #tab3 > .tab3-kpi-row::-webkit-scrollbar{display:none;}
+  #tab3 > .tab3-kpi-row .kpi{
+    flex:0 0 150px!important;
+    min-width:150px!important;
+  }
+}
+@media(max-width:390px){
+  #tab3 > .tab3-kpi-row{
+    display:flex!important;
+    grid-template-columns:none!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi{
+    flex-basis:148px!important;
+    min-width:148px!important;
+  }
+}
+
+@media(max-width:680px){
+  #tab1 > .grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    gap:7px!important;
+    padding-bottom:4px!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  #tab1 > .grid::-webkit-scrollbar{display:none;}
+  #tab1 > .grid .kpi{
+    flex:0 0 155px!important;
+    min-width:155px!important;
+  }
+
+  #tab1 .table-wrap,
+  #tab3 .table-wrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  #tab1 table,
+  #tab3 table{
+    width:100%!important;
+    border-collapse:collapse!important;
+    border-spacing:0!important;
+  }
+  #cardsTable{min-width:1120px!important;table-layout:fixed!important;}
+  #cardPayTable{min-width:760px!important;table-layout:fixed!important;}
+  #loansTable{min-width:1580px!important;table-layout:fixed!important;}
+  #monthlyExpenseTable{min-width:900px!important;table-layout:fixed!important;}
+  #salaryExpenseHistoryTable{min-width:1180px!important;table-layout:fixed!important;}
+
+  #tab1 thead,
+  #tab3 thead{display:table-header-group!important;}
+  #tab1 tfoot,
+  #tab3 tfoot{display:table-footer-group!important;}
+  #tab1 tbody,
+  #tab3 tbody{display:table-row-group!important;width:auto!important;}
+  #tab1 tr,
+  #tab3 tr{
+    display:table-row!important;
+    width:auto!important;
+    background:transparent!important;
+    border:0!important;
+    border-radius:0!important;
+    margin:0!important;
+    padding:0!important;
+    box-shadow:none!important;
+  }
+  #tab1 th,
+  #tab1 td,
+  #tab3 th,
+  #tab3 td{
+    display:table-cell!important;
+    width:auto;
+    border-bottom:1px solid var(--line)!important;
+    padding:7px 5px!important;
+    text-align:left!important;
+    vertical-align:middle!important;
+    white-space:normal!important;
+  }
+  #tab1 th.num,#tab1 td.num,#tab3 th.num,#tab3 td.num{text-align:right!important;}
+  #tab1 th.center,#tab1 td.center,#tab3 th.center,#tab3 td.center{text-align:center!important;}
+  #tab1 td::before,
+  #tab3 td::before{content:none!important;display:none!important;}
+
+  #tab1 input.cell,
+  #tab1 select.cell,
+  #tab1 textarea.cell,
+  #tab3 input.cell,
+  #tab3 select.cell,
+  #tab3 textarea.cell{
+    height:auto!important;
+    min-height:32px!important;
+    font-size:12px!important;
+    padding:5px 6px!important;
+    border-radius:8px!important;
+  }
+  #tab1 .date-field,
+  #tab3 .date-field{
+    display:flex!important;
+    width:140px!important;
+    min-width:140px!important;
+    height:auto!important;
+    margin:auto!important;
+  }
+  #tab1 .date-field .date-text,
+  #tab3 .date-field .date-text{
+    display:block!important;
+    flex:1!important;
+    height:32px!important;
+  }
+  #tab1 .date-field .date-btn,
+  #tab3 .date-field .date-btn{
+    display:block!important;
+    width:34px!important;
+    min-width:34px!important;
+    height:32px!important;
+  }
+  #tab1 .date-field .date-native,
+  #tab3 .date-field .date-native{
+    position:absolute!important;
+    width:1px!important;
+    height:1px!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    padding:0!important;
+  }
+}
+
+@media(max-width:680px){
+  
+  #tab1 > .grid,
+  #tab3 > .tab3-kpi-row{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    gap:8px!important;
+    padding-bottom:6px!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  #tab1 > .grid::-webkit-scrollbar,
+  #tab3 > .tab3-kpi-row::-webkit-scrollbar{display:none;}
+  #tab1 > .grid .kpi{
+    flex:0 0 205px!important;
+    min-width:205px!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi{
+    flex:0 0 220px!important;
+    min-width:220px!important;
+  }
+  #tab1 .kpi .value,
+  #tab3 .kpi .value{
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    font-size:19px!important;
+    line-height:1.2!important;
+    word-break:normal!important;
+  }
+  #tab1 .kpi .label,
+  #tab1 .kpi .hint,
+  #tab3 .kpi .label,
+  #tab3 .kpi .hint{
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+
+  
+  #tab1 .table-wrap,
+  #tab3 .table-wrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  #cardsTable{
+    min-width:1480px!important;
+    table-layout:auto!important;
+  }
+  #cardPayTable{
+    min-width:880px!important;
+    table-layout:auto!important;
+  }
+  #loansTable{
+    min-width:2380px!important;
+    table-layout:auto!important;
+  }
+  #monthlyExpenseTable{
+    min-width:1120px!important;
+    table-layout:auto!important;
+  }
+  #salaryExpenseHistoryTable{
+    min-width:1380px!important;
+    table-layout:auto!important;
+  }
+
+  
+  #tab1 th,
+  #tab1 td,
+  #tab3 th,
+  #tab3 td{
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  #tab1 th.num,
+  #tab1 td.num,
+  #tab3 th.num,
+  #tab3 td.num,
+  #tab1 input.money,
+  #tab3 input.money,
+  #cardTotalLimit,
+  #cardTotalDebt,
+  #cardTotalAvail,
+  #cardTotalPay,
+  #cardTotalPaid{
+    white-space:nowrap!important;
+    min-width:125px!important;
+  }
+  #cardsTable th:nth-child(5), #cardsTable td:nth-child(5),
+  #cardsTable th:nth-child(6), #cardsTable td:nth-child(6),
+  #cardsTable th:nth-child(7), #cardsTable td:nth-child(7),
+  #cardsTable th:nth-child(8), #cardsTable td:nth-child(8),
+  #cardsTable th:nth-child(9), #cardsTable td:nth-child(9){
+    min-width:135px!important;
+  }
+  #cardsTable th:nth-child(10), #cardsTable td:nth-child(10){
+    min-width:190px!important;
+  }
+  #cardsTable th:nth-child(12), #cardsTable td:nth-child(12){
+    min-width:145px!important;
+  }
+  #cardsTable .avail-info,
+  #cardsTable .avail-line,
+  #cardsTable .avail-info b,
+  #cardsTable .avail-info small{
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+
+  #loansTable th:nth-child(1), #loansTable td:nth-child(1),
+  #loansTable th:nth-child(2), #loansTable td:nth-child(2){
+    min-width:150px!important;
+  }
+  #loansTable th:nth-child(3), #loansTable td:nth-child(3),
+  #loansTable th:nth-child(4), #loansTable td:nth-child(4),
+  #loansTable th:nth-child(11), #loansTable td:nth-child(11),
+  #loansTable th:nth-child(12), #loansTable td:nth-child(12),
+  #loansTable th:nth-child(13), #loansTable td:nth-child(13),
+  #loansTable th:nth-child(14), #loansTable td:nth-child(14),
+  #loansTable th:nth-child(15), #loansTable td:nth-child(15){
+    min-width:145px!important;
+  }
+  #loansTable th:nth-child(5), #loansTable td:nth-child(5),
+  #loansTable th:nth-child(7), #loansTable td:nth-child(7){
+    min-width:160px!important;
+  }
+  #loansTable th:nth-child(6), #loansTable td:nth-child(6),
+  #loansTable th:nth-child(8), #loansTable td:nth-child(8),
+  #loansTable th:nth-child(9), #loansTable td:nth-child(9),
+  #loansTable th:nth-child(10), #loansTable td:nth-child(10){
+    min-width:115px!important;
+  }
+  #loansTable th:nth-child(16), #loansTable td:nth-child(16){
+    min-width:72px!important;
+  }
+
+  #monthlyExpenseTable th:nth-child(1), #monthlyExpenseTable td:nth-child(1){min-width:155px!important;}
+  #monthlyExpenseTable th:nth-child(2), #monthlyExpenseTable td:nth-child(2){min-width:260px!important;}
+  #monthlyExpenseTable th:nth-child(3), #monthlyExpenseTable td:nth-child(3){min-width:150px!important;}
+  #monthlyExpenseTable th:nth-child(4), #monthlyExpenseTable td:nth-child(4){min-width:90px!important;}
+  #monthlyExpenseTable th:nth-child(5), #monthlyExpenseTable td:nth-child(5){min-width:250px!important;}
+  #monthlyExpenseTable th:nth-child(6), #monthlyExpenseTable td:nth-child(6){min-width:70px!important;}
+  #monthlyIncomeTable{min-width:760px!important;table-layout:auto!important;}
+  #monthlyIncomeTable th:nth-child(1), #monthlyIncomeTable td:nth-child(1){min-width:155px!important;}
+  #monthlyIncomeTable th:nth-child(2), #monthlyIncomeTable td:nth-child(2){min-width:220px!important;}
+  #monthlyIncomeTable th:nth-child(3), #monthlyIncomeTable td:nth-child(3){min-width:150px!important;}
+  #monthlyIncomeTable th:nth-child(4), #monthlyIncomeTable td:nth-child(4){min-width:220px!important;}
+  #monthlyIncomeTable th:nth-child(5), #monthlyIncomeTable td:nth-child(5){min-width:70px!important;}
+
+  #salaryExpenseHistoryTable th,
+  #salaryExpenseHistoryTable td{
+    min-width:125px!important;
+    white-space:nowrap!important;
+  }
+  #salaryExpenseHistoryTable th:first-child,
+  #salaryExpenseHistoryTable td:first-child{
+    min-width:115px!important;
+  }
+
+  #tab1 input.cell,
+  #tab1 select.cell,
+  #tab1 textarea.cell,
+  #tab3 input.cell,
+  #tab3 select.cell,
+  #tab3 textarea.cell{
+    min-width:110px!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  #tab1 input.money,
+  #tab3 input.money{
+    min-width:130px!important;
+  }
+}
+
+@media(max-width:680px){
+  html,
+  body{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+    -webkit-text-size-adjust:100%!important;
+  }
+  main{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+
+  
+  #tab1 .panel,
+  #tab3 .panel{
+    max-width:100%!important;
+  }
+  #tab1 .table-wrap,
+  #tab3 .table-wrap{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+
+  
+  #tab1 input,
+  #tab1 select,
+  #tab1 textarea,
+  #tab1 button,
+  #tab1 .date-field .date-text,
+  #tab1 .date-field .date-native{
+    font-size:16px!important;
+  }
+  #tab1 input.cell,
+  #tab1 select.cell,
+  #tab1 textarea.cell{
+    min-height:38px!important;
+    line-height:1.25!important;
+  }
+  #tab1 .date-field{
+    min-height:38px!important;
+  }
+  #tab1 .date-field .date-btn{
+    font-size:16px!important;
+  }
+
+  #tab1 th,
+  #tab1 td{
+    font-size:13px!important;
+    -webkit-text-size-adjust:100%!important;
+  }
+  #tab1 .kpi .value{
+    font-size:20px!important;
+  }
+}
+
+@media(max-width:680px){
+  
+  #tab1 .date-field,
+  #tab3 .date-field{
+    position:relative!important;
+    display:flex!important;
+    align-items:center!important;
+    width:172px!important;
+    min-width:172px!important;
+    height:40px!important;
+    min-height:40px!important;
+    margin:auto!important;
+    overflow:hidden!important;
+  }
+  #tab1 .date-field .date-text,
+  #tab3 .date-field .date-text{
+    display:block!important;
+    flex:1 1 auto!important;
+    height:38px!important;
+    min-height:38px!important;
+    font-size:16px!important;
+    line-height:38px!important;
+    padding:0 6px!important;
+    text-align:center!important;
+    pointer-events:none!important;
+  }
+  #tab1 .date-field .date-btn,
+  #tab3 .date-field .date-btn{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    font-size:16px!important;
+    pointer-events:none!important;
+  }
+  #tab1 .date-field .date-native,
+  #tab3 .date-field .date-native{
+    display:block!important;
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    min-width:100%!important;
+    min-height:100%!important;
+    opacity:0.01!important;
+    pointer-events:auto!important;
+    z-index:10!important;
+    cursor:pointer!important;
+    border:0!important;
+    margin:0!important;
+    padding:0!important;
+    background:transparent!important;
+    color:transparent!important;
+    font-size:16px!important;
+    -webkit-appearance:auto!important;
+    appearance:auto!important;
+  }
+}
+
+@media(max-width:680px){
+  #tab3 > .tab3-kpi-row{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    overflow:visible!important;
+    padding-bottom:0!important;
+    -webkit-overflow-scrolling:auto!important;
+    scrollbar-width:auto!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi{
+    flex:none!important;
+    flex-basis:auto!important;
+    min-width:0!important;
+    width:auto!important;
+    padding:9px 8px!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi:nth-child(5){
+    grid-column:1 / -1;
+  }
+  #tab3 > .tab3-kpi-row .kpi .value{
+    font-size:17px!important;
+    line-height:1.2!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    word-break:normal!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi .label{
+    font-size:10.5px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi .hint{
+    font-size:10.5px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+}
+@media(max-width:360px){
+  #tab3 > .tab3-kpi-row{
+    gap:6px!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi{
+    padding:8px 6px!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi .value{
+    font-size:15.5px!important;
+  }
+  #tab3 > .tab3-kpi-row .kpi .label,
+  #tab3 > .tab3-kpi-row .kpi .hint{
+    font-size:10px!important;
+  }
+}
+
+@media(max-width:680px){
+  #cardPayTable .auto-source .source-line{
+    width:100%;
+    max-width:100%;
+    white-space:normal;
+    padding:6px 8px;
+    border-radius:10px;
+  }
+  #cardPayTable .auto-source .source-detail{
+    font-size:11.5px;
+    margin-top:5px;
+  }
+}
+
+@media(max-width:680px){
+  #cardPayTable{
+    min-width:700px!important;
+    table-layout:fixed!important;
+  }
+  #cardPayTable th,
+  #cardPayTable td{
+    padding:7px 5px!important;
+  }
+  #cardPayTable th:nth-child(1), #cardPayTable td:nth-child(1){
+    width:22%!important;
+    min-width:130px!important;
+  }
+  #cardPayTable th:nth-child(2), #cardPayTable td:nth-child(2){
+    width:12%!important;
+    min-width:78px!important;
+  }
+  #cardPayTable th:nth-child(3), #cardPayTable td:nth-child(3){
+    width:15%!important;
+    min-width:98px!important;
+    text-align:right!important;
+  }
+  #cardPayTable th:nth-child(4), #cardPayTable td:nth-child(4){
+    width:34%!important;
+    min-width:238px!important;
+  }
+  #cardPayTable th:nth-child(5), #cardPayTable td:nth-child(5){
+    width:17%!important;
+    min-width:118px!important;
+  }
+  #cardPayTable .plan-card-name{
+    padding:3px 7px!important;
+    min-width:0!important;
+  }
+  #cardPayTable .auto-source .source-line{
+    margin:2px 0!important;
+  }
+}
+
+@media(max-width:680px){
+  #tab1 > .grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    overflow:visible!important;
+    padding-bottom:0!important;
+    -webkit-overflow-scrolling:auto!important;
+    scrollbar-width:auto!important;
+  }
+  #tab1 > .grid .kpi{
+    flex:none!important;
+    flex-basis:auto!important;
+    min-width:0!important;
+    width:auto!important;
+    padding:9px 8px!important;
+  }
+  #tab1 > .grid .kpi .value{
+    font-size:17px!important;
+    line-height:1.2!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    word-break:normal!important;
+  }
+  #tab1 > .grid .kpi .label{
+    font-size:10.5px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+  #tab1 > .grid .kpi .hint{
+    font-size:10.5px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+}
+@media(max-width:360px){
+  #tab1 > .grid{
+    gap:6px!important;
+  }
+  #tab1 > .grid .kpi{
+    padding:8px 6px!important;
+  }
+  #tab1 > .grid .kpi .value{
+    font-size:15.5px!important;
+  }
+  #tab1 > .grid .kpi .label,
+  #tab1 > .grid .kpi .hint{
+    font-size:10px!important;
+  }
+}
+
+
+
+/* ===== V42: Phóng to giao diện kế hoạch + nhật ký đáo thẻ ===== */
+@media(min-width:900px){
+  .header-inner, main{
+    max-width:1500px!important;
+  }
+}
+
+/* ===== FIX: Giữ bảng Kế hoạch như giao diện cũ; Nhật ký đáo nhỏ gọn giống Kế hoạch ===== */
+#cardPayTableWrap{
+  overflow:visible!important;
+}
+#cardPayTable{
+  min-width:0!important;
+  width:100%!important;
+  table-layout:fixed!important;
+}
+#cardPayTable th,
+#cardPayTable td{
+  font-size:13px!important;
+  padding:7px 6px!important;
+  line-height:1.3!important;
+  white-space:normal!important;
+}
+#cardPayTable th:nth-child(1), #cardPayTable td:nth-child(1){width:13%!important;min-width:0!important;}
+#cardPayTable th:nth-child(2), #cardPayTable td:nth-child(2){width:10%!important;min-width:0!important;}
+#cardPayTable th:nth-child(3), #cardPayTable td:nth-child(3){width:13%!important;min-width:0!important;}
+#cardPayTable th:nth-child(4), #cardPayTable td:nth-child(4){width:32%!important;min-width:0!important;}
+#cardPayTable th:nth-child(5), #cardPayTable td:nth-child(5){width:13%!important;min-width:0!important;}
+#cardPayTable th:nth-child(6), #cardPayTable td:nth-child(6){width:19%!important;min-width:0!important;}
+#cardPayTable .small-btn{
+  font-size:12px!important;
+  padding:7px 9px!important;
+  border-radius:9px!important;
+  min-height:auto!important;
+}
+#cardPayTable .auto-source .source-line{
+  font-size:12px!important;
+  padding:3px 7px!important;
+  margin:2px 0!important;
+  border-radius:999px!important;
+}
+#cardPayTable .auto-source .source-detail{
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+
+
+
+
+/* ===== VFINAL: Nhật ký rút thẻ gọn, không cần thanh cuộn ngang ===== */
+.actual-log-title{
+  justify-content:flex-start!important;
+  margin-bottom:8px!important;
+}
+.actual-log-title .note{
+  display:none!important;
+}
+.actual-log-box .table-wrap{
+  overflow-x:visible!important;
+  overflow-y:visible!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+#cardActualTable{
+  min-width:0!important;
+  width:100%!important;
+  table-layout:fixed!important;
+}
+#cardActualTable th,
+#cardActualTable td{
+  font-size:12px!important;
+  padding:6px 4px!important;
+  line-height:1.25!important;
+  white-space:normal!important;
+  min-width:0!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+#cardActualTable th:nth-child(1),#cardActualTable td:nth-child(1){width:15%!important;}
+#cardActualTable th:nth-child(2),#cardActualTable td:nth-child(2){width:10%!important;}
+#cardActualTable th:nth-child(3),#cardActualTable td:nth-child(3){width:10%!important;}
+#cardActualTable th:nth-child(4),#cardActualTable td:nth-child(4){width:14%!important;}
+#cardActualTable th:nth-child(5),#cardActualTable td:nth-child(5){width:9%!important;}
+#cardActualTable th:nth-child(6),#cardActualTable td:nth-child(6){width:14%!important;}
+#cardActualTable th:nth-child(7),#cardActualTable td:nth-child(7){width:14%!important;}
+#cardActualTable th:nth-child(8),#cardActualTable td:nth-child(8){width:14%!important;}
+#cardActualTable input.cell,
+#cardActualTable select.cell{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  font-size:12px!important;
+  padding:5px 4px!important;
+  min-height:30px!important;
+  border-radius:7px!important;
+}
+#cardActualTable input.money{
+  min-width:0!important;
+  text-align:right!important;
+}
+#cardActualTable .date-field{
+  width:100%!important;
+  min-width:0!important;
+  height:32px!important;
+}
+#cardActualTable .date-field .date-text{
+  height:30px!important;
+  font-size:12px!important;
+  padding:4px 2px!important;
+}
+#cardActualTable .date-field .date-btn{
+  width:28px!important;
+  min-width:28px!important;
+  height:30px!important;
+  font-size:13px!important;
+}
+#cardActualTable .small-btn{
+  font-size:11px!important;
+  padding:5px 6px!important;
+  border-radius:7px!important;
+  white-space:normal!important;
+}
+
+
+
+/* Nút xuất Excel đặt cạnh Undo/Redo */
+#exportExcelBtn{background:#ecfdf3;color:#067647;border:1px solid #abefc6}
+.actions select.month{border:0;border-radius:11px;padding:9px 11px;font-weight:800;background:#fff;color:var(--blue);min-width:150px}
+@media(max-width:680px){
+  .actions{grid-template-columns:1fr 1fr!important;}
+  .actions select.month{width:100%;min-width:0;}
+  #autosaveStatus{grid-column:1 / -1;}
+}
+
+
+
+
+/* ===== FIX MOBILE: Nhật ký rút thẻ dùng cùng giao diện với Kế hoạch thanh toán ===== */
+@media(max-width:680px){
+  /* Nhật ký rút thẻ: dùng cùng kiểu bảng ngang như Kế hoạch thanh toán */
+  .actual-log-box .table-wrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  #cardActualTable{
+    display:table!important;
+    width:auto!important;
+    min-width:760px!important;
+    table-layout:fixed!important;
+    border-collapse:collapse!important;
+    border-spacing:0!important;
+  }
+  #cardActualTable thead{display:table-header-group!important;}
+  #cardActualTable tbody{display:table-row-group!important;}
+  #cardActualTable tr{display:table-row!important;}
+  #cardActualTable th,
+  #cardActualTable td{
+    display:table-cell!important;
+    font-size:12px!important;
+    padding:7px 5px!important;
+    white-space:normal!important;
+    border-bottom:1px solid var(--line)!important;
+    background:transparent!important;
+  }
+  #cardActualTable td::before{
+    content:none!important;
+    display:none!important;
+  }
+  #cardActualTable input.cell,
+  #cardActualTable select.cell{
+    width:100%!important;
+    min-width:0!important;
+    font-size:16px!important;
+    min-height:36px!important;
+  }
+
+  /* Khoản chi vẫn giữ bản gọn */
+  #monthlyExpenseTable{
+    min-width:720px!important;
+    width:auto!important;
+    table-layout:fixed!important;
+  }
+  #monthlyExpenseTable th,
+  #monthlyExpenseTable td{
+    font-size:11.5px!important;
+    padding:5px 4px!important;
+  }
+}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>SỔ QUẢN LÝ THẺ · VAY · TIẾT KIỆM</h1>
+    </div>
+    <div class="actions">
+      <button id="undoBtn">↶ Undo</button>
+      <button id="redoBtn">↷ Redo</button>
+      <select id="monthSelect" class="month" title="Tháng đang quản"></select>
+      <button id="exportExcelBtn">⬇ Xuất Excel</button>
+      <span id="autosaveStatus" class="sub" style="align-self:center">Saved ✓</span>
+      <button id="loginCloudBtn" style="display:none">Đăng nhập Google</button>
+      <button id="logoutCloudBtn" style="display:none">Đăng xuất</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab1">1. Thẻ + Khoản vay</button>
+    <button class="tab-btn" data-tab="tab2">2. Tiết kiệm / Quỹ chung</button>
+    <button class="tab-btn" data-tab="tab3">3. Chi tiết chi tiêu tháng</button>
+  </div>
+
+  <section id="tab1" class="tab active">
+    <div class="grid">
+      <div class="kpi"><div class="label">Tổng hạn mức thẻ</div><div id="kLimit" class="value">0</div></div>
+      <div class="kpi red"><div class="label">Tổng dư nợ thẻ</div><div id="kDebt" class="value">0</div><div id="kUtil" class="hint">0%</div></div>
+      <div class="kpi green"><div class="label">HM còn lại</div><div id="kAvail" class="value">0</div></div>
+      <div class="kpi orange"><div class="label">Khoản cần trả tháng</div><div id="kNeed" class="value">0</div></div>
+    </div>
+
+    <div class="panel" id="cardDueAlertPanel">
+      <h2>🔔 Cảnh báo hạn thẻ</h2>
+      <div class="body" id="cardDueAlerts"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Thông tin thẻ tín dụng</h2>
+      <div class="table-wrap">
+        <table id="cardsTable">
+          <thead>
+            <tr>
+              <th>Thẻ</th>
+              <th class="center">Ngày chốt</th>
+              <th class="center">Ngày TT mặc định</th>
+              <th class="center">Miễn lãi<br><small>tự tính</small></th>
+              <th class="num">Hạn mức</th>
+              <th class="num">DƯ NỢ</th>
+              <th class="num">HM còn lại</th>
+              <th class="num">Số tiền TT</th>
+              <th class="num">Đã thanh toán</th>
+              <th class="center" style="min-width:190px">Ngày TT tháng này</th>
+              <th class="center">Ngày Rút</th>
+              <th class="status-cell">Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="4" class="num">Tổng</th>
+              <th class="num" id="cardTotalLimit">0</th>
+              <th class="num" id="cardTotalDebt">0</th>
+              <th class="num" id="cardTotalAvail">0</th>
+              <th class="num" id="cardTotalPay">0</th>
+              <th class="num" id="cardTotalPaid">0</th>
+              <th colspan="3"></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="panel">
+        <h2>Kế hoạch thanh toán thẻ trong tháng</h2>
+        <div class="table-wrap" id="cardPayTableWrap">
+          <table id="cardPayTable">
+            <thead><tr><th class="center">Ngày TT</th><th>Thẻ</th><th class="num">Số tiền</th><th>Nguồn đề xuất</th><th>Trạng thái</th><th class="center">Ghi thực tế</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="body">
+          <button class="small-btn" id="addCardPay">+ Thêm lịch thanh toán thẻ</button>
+          <div class="actual-log-box">
+            <div class="actual-log-title">
+              <span>Nhật ký rút thẻ</span>
+            </div>
+            <div class="table-wrap">
+              <table id="cardActualTable">
+                <thead>
+                  <tr>
+                    <th class="center">Ngày rút</th>
+                    <th>Rút</th>
+                    <th>Trả vào</th>
+                    <th class="num">Số tiền rút</th>
+                    <th class="num">Phí (%)</th>
+                    <th class="num">Tiền nhận lại</th>
+                    <th class="num">Số tiền phí</th>
+                    <th class="center">Ghi vào chi phí</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                  <tr>
+                    <th colspan="6" class="num">Tổng phí</th>
+                    <td class="num" id="cardActualFeeTotal">0</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Cảnh báo</h2>
+        <div class="body" id="alerts"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Thông tin khoản vay</h2>
+      <div class="table-wrap">
+        <table id="loansTable">
+          <thead>
+            <tr>
+              <th>Khoản vay</th>
+              <th>Người vay</th>
+              <th class="num">Số tiền vay</th>
+              <th class="num">Dư nợ</th>
+              <th class="center">Ngày vay</th>
+              <th class="num">Thời hạn vay</th>
+              <th class="center">Ngày đến hạn</th>
+              <th class="num">Lãi suất năm</th>
+              <th class="num">Lãi suất tháng</th>
+              <th class="num">Số tháng đã TT</th>
+              <th class="num">Đã TT gốc</th>
+              <th class="num">Tiền lãi/tháng</th>
+              <th class="num">Tiền lãi đã TT</th>
+              <th class="num">Tổng đã TT</th>
+              <th class="num">Trả hàng tháng</th>
+              <th class="center">Xóa</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="body"><button class="small-btn" id="addLoan">+ Thêm khoản vay</button></div>
+    </div>
+  </section>
+
+  <section id="tab2" class="tab">
+    <div class="panel">
+      <h2>Ghi chú tự do</h2>
+      <div class="table-wrap">
+        <table id="freeNotesTable" style="min-width:650px">
+          <thead>
+            <tr>
+              <th class="center" style="width:70px">Dòng</th>
+              <th>Nội dung ghi chú</th>
+              <th class="center" style="width:80px">Xóa</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="body"><button class="small-btn" id="addFreeNote">+ Thêm dòng ghi chú</button></div>
+    </div>
+
+    <div class="grid">
+      <div class="kpi"><div class="label">Tài khoản chung</div><div id="sFund" class="value">0</div></div>
+      <div class="kpi red"><div class="label">Đã dùng</div><div id="sUsed" class="value">0</div></div>
+      <div class="kpi green"><div class="label">Còn lại</div><div id="sLeft" class="value">0</div></div>
+      <div class="kpi orange"><div class="label">Hụi đã đóng</div><div id="sHui" class="value">0</div></div>
+    </div>
+
+    <div class="two">
+      <div class="panel">
+        <h2>Số tiền đã tích góp / tài khoản chung</h2>
+        <div class="table-wrap" id="fundTableWrap">
+          <table id="fundTable">
+            <thead><tr><th>Tháng/Năm</th><th class="num">Ánh</th><th class="num">Duy</th><th>Ghi chú</th><th class="center">Xóa</th></tr></thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <th>Tổng</th>
+                <td class="num" id="fundTotalAnh">0</td>
+                <td class="num" id="fundTotalDuy">0</td>
+                <td class="num" id="fundTotalAll">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="body"><button class="small-btn" id="addFund">+ Thêm dòng tích góp</button></div>
+      </div>
+
+      <div class="panel">
+        <h2>Chi tiết chi tiêu quỹ chung</h2>
+        <div class="table-wrap" id="expenseTableWrap">
+          <table id="expenseTable">
+            <thead><tr><th>Khoản chi</th><th class="num">Số tiền</th><th>Ghi chú</th><th class="center">Xóa</th></tr></thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <th>Tổng</th>
+                <td class="num" id="expenseTotalAmount">0</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="body"><button class="small-btn" id="addExpense">+ Thêm khoản chi</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Chi tiết đóng hụi 3tr</h2>
+      <div class="table-wrap" id="huiTableWrap">
+        <table id="huiTable">
+          <thead>
+            <tr>
+              <th class="center">Ngày đóng</th>
+              <th class="num">Số tiền</th>
+              <th>Ghi chú</th>
+              <th class="center">Xóa</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <th>Tổng</th>
+              <td class="num" id="huiDetailTotal">0</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="body"><button class="small-btn" id="addHui">+ Thêm kỳ hụi</button></div>
+    </div>
+
+    <div class="panel">
+      <h2>Bảng tổng hợp hụi</h2>
+      <div class="table-wrap">
+        <table id="huiSummaryTable" style="min-width:1200px">
+          <thead>
+            <tr>
+              <th>Dây hụi</th>
+              <th class="num">Số tiền hụi</th>
+              <th class="num">Đóng/tháng</th>
+              <th class="center">Bắt đầu</th>
+              <th class="center">Kết thúc</th>
+              <th class="num">Tổng tháng</th>
+              <th class="num">Đã đóng kỳ</th>
+              <th class="num">Mệnh giá theo lịch</th>
+              <th class="num">Thực đóng</th>
+              <th class="num">Lời</th>
+              <th class="num">Số kỳ còn lại</th>
+              <th class="num">Giá trị hiện tại</th>
+              <th class="num">Giá trị cuối</th>
+              <th class="center">Ngày đóng</th>
+              <th>Ghi chú</th>
+              <th class="center">Xóa</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="9" class="num">Tổng</th>
+              <th class="num" id="huiTotalProfit">0</th>
+              <th></th>
+              <th class="num" id="huiTotalCurrent">0</th>
+              <th class="num" id="huiTotalFinal">0</th>
+              <th colspan="3"></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="body"><button class="small-btn" id="addHuiSummary">+ Thêm dây hụi</button></div>
+    </div>
+  </section>
+
+  <section id="tab3" class="tab">
+  <div class="month-toolbar">
+    <div>
+      <div class="toolbar-label">Tháng đang quản lý</div>
+    </div>
+    <div class="month-controls">
+      <button class="small-btn" id="prevMonth">‹ Tháng trước</button>
+      <button class="small-btn" id="nextMonth">Tháng sau ›</button>
+      <button class="primary" id="newMonth">+ Tạo tháng mới</button>
+    </div>
+  </div>
+
+    <div class="grid tab3-kpi-row">
+      <div class="kpi">
+        <div class="label">Thu nhập tháng trước</div>
+        <div class="value" id="mSalary">0</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Định mức chi tiêu</div>
+        <div class="value" id="mBudget">0</div>
+        
+      </div>
+      <div class="kpi red">
+        <div class="label">Đã dùng</div>
+        <div class="value" id="mSpent">0</div>
+        
+      </div>
+      <div class="kpi green">
+        <div class="label">Còn lại</div>
+        <div class="value" id="mLeft">0</div>
+        
+      </div>
+      <div class="kpi orange">
+        <div class="label">Số khoản chi</div>
+        <div class="value" id="mCount">0</div>
+        
+      </div>
+    </div>
+
+    <div class="tab3-switch">
+      <button class="small-btn tab3-sub active" data-tab3-panel="tab3DetailBox">Nhập chi tiêu tháng</button>
+      <button class="small-btn tab3-sub" data-tab3-panel="tab3HistoryBox">Lịch sử & biểu đồ</button>
+    </div>
+
+    <div id="tab3DetailBox" class="tab3-sub-panel">
+      <div class="panel">
+        <h2>Chi tiết chi tiêu hằng tháng <span id="tab3CurrentMonthLabel" class="month-pill"></span></h2>
+        <div class="body">
+          <div class="tab3-inputs">
+            <label><b>Thu nhập tháng trước:</b>
+              <input id="monthlySalaryInput" class="cell money" inputmode="decimal">
+            </label>
+            <label><b>Định mức chi tiêu tháng đang chọn (đồng):</b>
+              <input id="monthlyBudgetInput" class="cell money" inputmode="decimal">
+            </label>
+          </div>
+          <div class="income-extra-box">
+            <div class="income-extra-head">
+              <b>Thu nhập thêm</b>
+              <button class="small-btn" id="addMonthlyIncome">+ Thêm thu nhập</button>
+            </div>
+            <div class="table-wrap">
+              <table id="monthlyIncomeTable">
+                <thead>
+                  <tr>
+                    <th class="center">Ngày nhận</th>
+                    <th>Nguồn thu</th>
+                    <th class="num">Số tiền</th>
+                    <th>Ghi chú</th>
+                    <th class="center">Xóa</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="monthlyExpenseTable">
+            <thead>
+              <tr>
+                <th class="center">Ngày chi</th>
+                <th>Khoản chi</th>
+                <th class="num">Số tiền</th>
+                <th class="center">CK/TM/Thẻ</th>
+                <th>Ghi chú</th>
+                <th class="center">Xóa</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="body"><button class="small-btn" id="addMonthlyExpense">+ Thêm khoản chi tháng</button></div>
+      </div>
+    </div>
+
+    <div id="tab3HistoryBox" class="tab3-sub-panel" style="display:none">
+      <div class="panel">
+        <h2>Lịch sử thu nhập & chi tiêu</h2>
+        <div class="body">
+          <div class="history-top">
+            <div class="history-stat"><div class="label">Tổng nguồn dùng</div><div class="value" id="histSalaryTotal">0</div></div>
+            <div class="history-stat"><div class="label">Tổng chi</div><div class="value redtxt" id="histSpentTotal">0</div></div>
+            <div class="history-stat"><div class="label">Còn lại</div><div class="value greentxt" id="histLeftTotal">0</div></div>
+            <div class="history-stat"><div class="label">Số tháng</div><div class="value" id="histMonthCount">0</div></div>
+          </div>
+          <div class="chart-legend"><span><i class="legend-dot legend-salary"></i>Tổng thu nhập</span><span><i class="legend-dot legend-ck"></i>Chi CK</span><span><i class="legend-dot legend-tm"></i>Chi TM</span><span><i class="legend-dot legend-card"></i>Chi thẻ</span></div>
+          <div class="chart-wrap"><div id="salaryExpenseChart" class="bar-chart"></div></div>
+        </div>
+        <div class="table-wrap">
+          <table id="salaryExpenseHistoryTable" style="min-width:1380px">
+            <thead>
+              <tr>
+                <th>Tháng</th>
+                <th class="num">Thu nhập tháng trước</th>
+                <th class="num">Thu nhập thêm</th>
+                <th class="num">Tổng nguồn dùng</th>
+                <th class="num">Định mức chi tiêu</th>
+                <th class="num">Đã dùng</th>
+                <th class="num">CK</th>
+                <th class="num">TM</th>
+                <th class="num">Thẻ</th>
+                <th class="num">Còn lại</th>
+                <th class="num">Dư nợ cuối tháng</th>
+                <th class="num">Số khoản</th>
+                <th class="center">Xóa tháng</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const STORE_KEY = "duy_so_the_vay_tietkiem_v28";
+const STORE_META_KEY = STORE_KEY + "_meta";
+const DEVICE_ID_KEY = STORE_KEY + "_device_id";
+const CLOUD_SAVE_DELAY_MS = 10000;
+const CARD_WITHDRAW_FEE_RATE = 0.018;
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDOEdY2HyvqCR_7M0WBjMoUBZQXTNntkIE",
+  authDomain: "chitieu-81db8.firebaseapp.com",
+  projectId: "chitieu-81db8",
+  storageBucket: "chitieu-81db8.firebasestorage.app",
+  messagingSenderId: "137011930367",
+  appId: "1:137011930367:web:d65424809a428436b198ca",
+  measurementId: "G-10DGP4B479"
+};
+
+const FIREBASE_PUBLIC_COLLECTION = "public_books";
+const FIREBASE_PUBLIC_DOC_ID = "duy_so_the_vay_tietkiem";
+
+let DEVICE_ID = localStorage.getItem(DEVICE_ID_KEY);
+if(!DEVICE_ID){
+  DEVICE_ID = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2);
+  localStorage.setItem(DEVICE_ID_KEY, DEVICE_ID);
+}
+
+const cloudSync = {
+  ready:false,
+  applying:false,
+  saveTimer:null,
+  app:null,
+  auth:null,
+  db:null,
+  user:null,
+  docRef:null,
+  unsub:null,
+  mods:null,
+  lastRemoteMs:0,
+  lastWriteMs:0,
+  lastPayloadJSON:"",
+  pendingRemote:null,
+  applyTimer:null,
+  focusTimer:null,
+  initialized:false
+};
+
+const DEFAULT = {
+  cards:[
+    {name:"VIB", closeDay:10, dueDay:4, grace:55, limit:420},
+    {name:"UOB", closeDay:27, dueDay:14, grace:48, limit:168},
+    {name:"Sacom", closeDay:5, dueDay:30, grace:55, limit:200},
+    {name:"HSBC", closeDay:2, dueDay:29, grace:55, limit:119},
+    {name:"MB", closeDay:18, dueDay:3, grace:45, limit:95},
+    {name:"Techcom", closeDay:20, dueDay:5, grace:45, limit:120}
+  ],
+  loans:[],
+  monthly:{},
+  monthlySpending:{},
+  deletedMonths:{},
+  freeNotes:[],
+  fund:[],
+  expenses:[],
+  hui:[],
+  huiSummary:[]
+};
+
+function deep(x){return JSON.parse(JSON.stringify(x))}
+function parseNum(v){
+  if(v===null||v===undefined) return 0;
+  if(typeof v==="number") return isFinite(v)?v:0;
+  let s=String(v).trim().replace(/\s/g,"");
+  if(!s) return 0;
+  const hasComma=s.includes(",");
+  const hasDot=s.includes(".");
+  if(hasComma && hasDot){
+    s=s.replace(/\./g,"").replace(",",".");
+  }else if(hasComma){
+    s=s.replace(",",".");
+  }else if(hasDot){
+    const parts=s.split(".");
+    const isThousandFormat=parts.length>1 && parts.slice(1).every(p=>p.length===3) && parts[0].length<=3;
+    if(isThousandFormat) s=parts.join("");
+  }
+  s=s.replace(/[^\d.-]/g,"");
+  const n=parseFloat(s);
+  return isFinite(n)?n:0;
+}
+function fmt(v){return parseNum(v).toLocaleString("vi-VN",{maximumFractionDigits:3})+" trđ"}
+function parseDong(v){
+  if(v===null||v===undefined) return 0;
+  if(typeof v==="number") return isFinite(v)?v:0;
+  const s=String(v).replace(/[^\d-]/g,"");
+  const n=parseInt(s,10);
+  return isFinite(n)?n:0;
+}
+function fmtDong(v){
+  return parseDong(v).toLocaleString("vi-VN")+" ₫";
+}
+function fmtDongInput(v){
+  const n=parseDong(v);
+  return n ? n.toLocaleString("vi-VN") : "";
+}
+function huiAmountDong(v){
+  const n=parseNum(v);
+  if(n>0 && n<10000) return Math.round(n*1000000);
+  return parseDong(v);
+}
+function formatDongInput(el){
+  if(!el) return 0;
+  const raw=String(el.value||"");
+  const digits=raw.replace(/[^\d]/g,"");
+  if(!digits){ el.value=""; return 0; }
+  const n=parseInt(digits,10)||0;
+  el.value=n.toLocaleString("vi-VN");
+  return n;
+}
+function refreshMonthlySpendingKpis(){
+  const plan=getMonthlySpending();
+  const salary=incomeUsableForMonth(currentMonth);
+  const budget=parseDong(plan.budget);
+  const spent=(plan.items||[]).reduce((s,r)=>s+parseDong(r.amount),0);
+  const left=budget-spent;
+  const setText=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
+  setText("tab3CurrentMonthLabel", monthName(currentMonth));
+  setText("mSalary", fmtDong(salary));
+  setText("mSalaryHint", "Thu nhập dùng cho " + monthName(currentMonth));
+  setText("mBudget", fmtDong(budget));
+  setText("mSpent", fmtDong(spent));
+  setText("mLeft", fmtDong(left));
+  setText("mCount", String((plan.items||[]).length));
+  const leftBox=document.getElementById("mLeft")?.closest(".kpi");
+  if(leftBox) leftBox.className="kpi "+(left<0?"red":"green");
+}
+function parseDateFlexible(v){
+  const s=String(v||"").trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(s+"T00:00:00");
+  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
+  if(m){
+    const y=m[3] ? (String(m[3]).length===2 ? Number("20"+m[3]) : Number(m[3])) : new Date().getFullYear();
+    return new Date(y, Number(m[2])-1, Number(m[1]));
+  }
+  return null;
+}
+function monthsPaidAuto(l){
+  const d=parseDateFlexible(l.startDateISO||l.startDate);
+  if(!d || isNaN(d.getTime())) return 0;
+  const now=new Date();
+  let months=(now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
+  if(now.getDate() >= d.getDate()) months += 1;
+  return Math.max(0, months);
+}
+function loanMonthlyRate(l){return parseNum(l.annualRate)/12}
+function loanMonthlyInterest(l){return parseNum(l.debt)*loanMonthlyRate(l)/100}
+function loanInterestPaid(l){return loanMonthlyInterest(l)*monthsPaidAuto(l)}
+function loanTotalPaid(l){return parseNum(l.paidPrincipal)+loanInterestPaid(l)}
+function loanDueISO(l){
+  const startIso=l.startDateISO || dateValueForInput(l.startDate||"", currentMonth, 1);
+  const term=parseNum(l.termMonths);
+  if(!startIso || !term) return "";
+  return addMonthsToISO(startIso, term);
+}
+function pct(v){return parseNum(v).toLocaleString("vi-VN",{maximumFractionDigits:1})+"%"}
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function nowMonth(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+function addMonth(key,n){const [y,m]=key.split("-").map(Number);const d=new Date(y,m-1+n,1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+function monthName(key){const [y,m]=key.split("-");return "Tháng "+Number(m)+"/"+y}
+function dayAfter(d){return Number(d||1)+1}
+function dueDateForMonth(month, day){const [y,m]=month.split("-").map(Number);const last=new Date(y,m,0).getDate();const d=Math.min(Number(day)||1,last);return String(d).padStart(2,"0")+"/"+String(m).padStart(2,"0")+"/"+y}
+function dueISOForMonth(month, day){
+  const [y,m]=month.split("-").map(Number);
+  const last=new Date(y,m,0).getDate();
+  const d=Math.min(Number(day)||1,last);
+  return y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+}
+function isoToDisplay(v){
+  const s=String(v||"").trim();
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m) return `${m[3]}/${m[2]}/${m[1]}`;
+  return s;
+}
+function dateValueForInput(v, month, fallbackDay){
+  const s=String(v||"").trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
+  if(m){
+    const y=(m[3] ? (String(m[3]).length===2 ? "20"+m[3] : m[3]) : month.split("-")[0]);
+    return `${y}-${String(m[2]).padStart(2,"0")}-${String(m[1]).padStart(2,"0")}`;
+  }
+  const dayOnly=s.match(/(\d{1,2})/);
+  const fallback = dayOnly ? Number(dayOnly[1]) : fallbackDay;
+  return dueISOForMonth(month, fallback);
+}
+function addMonthsToISO(iso, months){
+  const d=parseDateFlexible(iso);
+  if(!d || isNaN(d.getTime())) return "";
+  const originalDay=d.getDate();
+  const result=new Date(d.getFullYear(), d.getMonth()+parseNum(months), 1);
+  const lastDay=new Date(result.getFullYear(), result.getMonth()+1, 0).getDate();
+  result.setDate(Math.min(originalDay, lastDay));
+  return result.getFullYear()+"-"+String(result.getMonth()+1).padStart(2,"0")+"-"+String(result.getDate()).padStart(2,"0");
+}
+function calcHuiEndISO(row){
+  const startIso=row.startDateISO || dateValueForInput(row.startDate||"", currentMonth, 1);
+  return addMonthsToISO(startIso, row.totalMonths||0);
+}
+function calcHuiPayDay(row, startDate){
+  const m=String(row.payDay||"").match(/(\d{1,2})/);
+  const d=m ? Number(m[1]) : (startDate ? startDate.getDate() : 1);
+  return Math.max(1, Math.min(31, d||1));
+}
+function calcHuiPaidMonths(row){
+  const total=parseNum(row.totalMonths);
+  const startIso=row.startDateISO || dateValueForInput(row.startDate||"", currentMonth, 1);
+  const start=parseDateFlexible(startIso);
+  if(!start || isNaN(start.getTime()) || !total){
+    return Math.max(0, Math.min(total||999, parseNum(row.paidMonths)));
+  }
+  const today=new Date();
+  if(today < start) return 0;
+  const payDay=calcHuiPayDay(row,start);
+  let months=(today.getFullYear()-start.getFullYear())*12 + (today.getMonth()-start.getMonth()) + 1;
+  const lastThisMonth=new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+  const thisMonthPayDay=Math.min(payDay,lastThisMonth);
+  if(today.getDate() < thisMonthPayDay) months -= 1;
+  months=Math.floor(months);
+  return Math.max(0, Math.min(total, months));
+}
+function getDaySort(s,fallback){const m=String(s||"").match(/(\d{1,2})/);return m?Number(m[1]):(Number(fallback)||31)}
+function dateSortValue(v, fallbackDay){
+  const s=String(v||"").trim();
+  let d=null;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    d=new Date(s+"T00:00:00");
+  }else{
+    const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
+    if(m){
+      const y=m[3] ? (String(m[3]).length===2 ? Number("20"+m[3]) : Number(m[3])) : Number(currentMonth.split("-")[0]);
+      d=new Date(y, Number(m[2])-1, Number(m[1]));
+    }
+  }
+  if(d && !isNaN(d.getTime())) return d.getTime();
+  const [y,m]=currentMonth.split("-").map(Number);
+  return new Date(y, m-1, Number(fallbackDay)||31).getTime();
+}
+function statusSortValue(status){
+  const s=String(status||"Chưa xử lý");
+  if(s==="Đã xử lý") return 3;
+  if(s==="Tạm hoãn") return 2;
+  if(s==="Thanh toán 1 phần") return 1;
+  return 0;
+}
+function statusClass(status){
+  const s=String(status||"Chưa xử lý");
+  if(s==="Đã xử lý") return "status-done";
+  if(s==="Tạm hoãn" || s==="Thanh toán 1 phần") return "status-wait";
+  return "status-todo";
+}
+function compareCardDueNearest(a,b){
+  const da=dateSortValue(a.m.payDateISO||a.m.payDate,a.c.dueDay);
+  const db=dateSortValue(b.m.payDateISO||b.m.payDate,b.c.dueDay);
+  if(da!==db) return da-db;
+  const statusDiff=statusSortValue(a.m.status)-statusSortValue(b.m.status);
+  if(statusDiff!==0) return statusDiff;
+  return String(a.c.name||"").localeCompare(String(b.c.name||""),"vi");
+}
+function updateCardPaidStatus(row){
+  if(!row) return;
+  const paid=parseNum(row.paidAmount);
+  const remain=parseNum(row.payAmount);
+  if(paid>0){
+    row.status=remain<=0 ? "Đã xử lý" : "Thanh toán 1 phần";
+  }else if(row.status==="Thanh toán 1 phần"){
+    row.status="Chưa xử lý";
+  }
+}
+
+function makeDateClamped(year, monthIndex, day){
+  const last=new Date(year, monthIndex+1, 0).getDate();
+  return new Date(year, monthIndex, Math.min(Number(day)||1,last));
+}
+function isoFromDate(d){
+  if(!d || isNaN(d.getTime())) return "";
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function dayDiff(a,b){
+  const ms=24*60*60*1000;
+  const da=new Date(a.getFullYear(),a.getMonth(),a.getDate());
+  const db=new Date(b.getFullYear(),b.getMonth(),b.getDate());
+  return Math.round((db-da)/ms);
+}
+function sourceRepayInfo(card, txDate){
+  const closeDay=Number(card.closeDay)||1;
+  const dueDay=Number(card.dueDay)||1;
+  const closeThis=makeDateClamped(txDate.getFullYear(), txDate.getMonth(), closeDay);
+  const statementDate=(txDate.getTime()<=closeThis.getTime()) ? closeThis : makeDateClamped(txDate.getFullYear(), txDate.getMonth()+1, closeDay);
+  const dueMonthOffset=(dueDay<=closeDay)?1:0;
+  const dueDate=makeDateClamped(statementDate.getFullYear(), statementDate.getMonth()+dueMonthOffset, dueDay);
+  return {statementDate,dueDate,days:dayDiff(txDate,dueDate),dueISO:isoFromDate(dueDate)};
+}
+function isNewCycleTxn(card, txDate){
+  const closeDay=Number(card.closeDay)||1;
+  const closeThis=makeDateClamped(txDate.getFullYear(), txDate.getMonth(), closeDay);
+  return txDate.getTime()>closeThis.getTime();
+}
+function maxGraceInfo(card, monthKey=currentMonth){
+  const [yy,mm]=String(monthKey||nowMonth()).split("-").map(Number);
+  const closeDay=Number(card.closeDay)||1;
+  const closeDate=makeDateClamped(yy||new Date().getFullYear(), (mm||new Date().getMonth()+1)-1, closeDay);
+  const bestTxDate=new Date(closeDate.getFullYear(), closeDate.getMonth(), closeDate.getDate()+1);
+  const info=sourceRepayInfo(card,bestTxDate);
+  return {
+    days:Math.max(0,info.days||0),
+    bestTxISO:isoFromDate(bestTxDate),
+    dueISO:info.dueISO,
+    statementISO:isoFromDate(info.statementDate)
+  };
+}
+function buildAutoPaymentPlan(rows){
+  const states={};
+  data.cards.forEach(c=>{
+    const debt=parseNum(cardMonthly(c).debt);
+    const limit=parseNum(c.limit);
+    states[c.name]={limit, debt:Math.max(0,debt)};
+  });
+  const payItems=(rows||[])
+    .filter(({m})=>parseNum(m.payAmount)>0)
+    .map(({c,m},idx)=>{
+      const iso=m.payDateISO||dateValueForInput(m.payDate||"", currentMonth, c.dueDay);
+      const txDate=parseDateFlexible(iso)||parseDateFlexible(dueISOForMonth(currentMonth,c.dueDay))||new Date();
+      return {c,m,idx,iso,txDate,amount:parseNum(m.payAmount),status:m.status||"Chưa xử lý"};
+    })
+    .sort((a,b)=>{
+      const d=a.txDate-b.txDate;
+      if(d!==0) return d;
+      const sv=statusSortValue(a.status)-statusSortValue(b.status);
+      if(sv!==0) return sv;
+      return b.amount-a.amount;
+    });
+  const unpaidKey=item=>String(item.iso||isoFromDate(item.txDate))+"|"+item.c.name;
+  const processed=new Set();
+  const plan={};
+  function sameOrEarlierPending(sourceName, item){
+    const currentKey=unpaidKey(item);
+    return payItems.some(x=>{
+      if(unpaidKey(x)===currentKey) return false;
+      return x.c.name===sourceName && !processed.has(unpaidKey(x)) && x.amount>0 && x.txDate.getTime()<=item.txDate.getTime();
+    });
+  }
+  function getCandidates(item, mode){
+    return data.cards
+      .map(src=>{
+        const sameCard=src.name===item.c.name;
+        const info=sourceRepayInfo(src,item.txDate);
+        if(sameCard && !isNewCycleTxn(src,item.txDate)) return null;
+        const st=states[src.name]||{limit:0,debt:0};
+        const limit=parseNum(st.limit);
+        const debt=parseNum(st.debt);
+        const available=Math.max(0, limit-debt);
+        const buffer=Math.min(5, Math.max(0, limit*0.05));
+        const util=limit?debt/limit*100:0;
+        const pending=sameOrEarlierPending(src.name,item);
+        const risky=(util>=90 || available<=5);
+        let usable=0;
+        if(mode===1){
+          if(!pending && !risky) usable=Math.max(0, available-buffer);
+        }else if(mode===2){
+          if(!pending) usable=Math.max(0, available-buffer);
+        }else if(mode===3){
+          if(!pending) usable=available;
+        }else{
+          usable=available;
+        }
+        return {src,available,usable,util,info,pending,risky,sameCard};
+      })
+      .filter(x=>x && x.usable>0)
+      .sort((a,b)=>{
+        const dayDiff=b.info.days-a.info.days;
+        if(dayDiff!==0) return dayDiff;
+        const riskDiff=(a.risky?1:0)-(b.risky?1:0);
+        if(riskDiff!==0) return riskDiff;
+        const sameDiff=(a.sameCard?1:0)-(b.sameCard?1:0);
+        if(sameDiff!==0) return sameDiff;
+        return b.usable-a.usable;
+      });
+  }
+  payItems.forEach(item=>{
+    const key=item.c.name;
+    if(item.status==="Đã xử lý"){
+      plan[key]={done:true,lines:[],missing:0};
+      const target=states[item.c.name];
+      if(target) target.debt=Math.max(0,target.debt-item.amount);
+      processed.add(unpaidKey(item));
+      return;
+    }
+    let left=item.amount;
+    const lines=[];
+    for(const mode of [1,2,3,4]){
+      if(left<=0.0001) break;
+      const candidates=getCandidates(item,mode);
+      for(const cand of candidates){
+        if(left<=0.0001) break;
+        const take=Math.min(left,cand.usable);
+        if(take<=0) continue;
+        const srcLimit=parseNum(states[cand.src.name].limit);
+        const srcDebtAfter=parseNum(states[cand.src.name].debt)+take;
+        states[cand.src.name].debt=srcDebtAfter;
+        const remainAfter=Math.max(0,srcLimit-srcDebtAfter);
+        const utilAfter=srcLimit?srcDebtAfter/srcLimit*100:0;
+        const [,clsAfter]=statusBadge(utilAfter,remainAfter);
+        left-=take;
+        const old=lines.find(x=>x.name===cand.src.name && x.repayISO===cand.info.dueISO);
+        if(old){
+          old.amount+=take;
+          old.cls=clsAfter;
+          old.remainAfter=remainAfter;
+          old.utilAfter=utilAfter;
+        }else{
+          lines.push({name:cand.src.name,amount:take,repayISO:cand.info.dueISO,days:cand.info.days,cls:clsAfter,remainAfter,utilAfter,sameCard:cand.sameCard});
+        }
+      }
+    }
+    const target=states[item.c.name];
+    if(target) target.debt=Math.max(0,parseNum(target.debt)-item.amount);
+    plan[key]={lines,missing:Math.max(0,left)};
+    processed.add(unpaidKey(item));
+  });
+  return plan;
+}
+function renderAutoSource(planRow){
+  if(!planRow) return '<span class="muted">Không có số tiền TT</span>';
+  if(planRow.done) return '<span class="muted">Đã xử lý</span>';
+  const lines=[];
+  (planRow.lines||[]).forEach(x=>{
+    const cls=x.cls||cardLimitClassByName(x.name);
+    const sameNote=x.sameCard ? " · Cùng thẻ/kỳ mới" : "";
+    const title=`Ngày phải trả lại nguồn: ${isoToDisplay(x.repayISO)} · ${x.days} ngày · HM còn sau rút: ${fmt(x.remainAfter||0)} · Tỷ lệ dùng: ${pct(x.utilAfter||0)}${sameNote}`;
+    const detail=`Trả lại: ${isoToDisplay(x.repayISO)} · ${x.days} ngày · HM còn: ${fmt(x.remainAfter||0)} · Dùng: ${pct(x.utilAfter||0)}${sameNote}`;
+    const label=(x.sameCard?"↻ ":"")+x.name+" "+fmt(x.amount);
+    lines.push(`<span class="source-line source-${esc(cls)}" title="${esc(title)}" tabindex="0">${esc(label)}<small class="source-detail">${esc(detail)}</small></span>`);
+  });
+  if(planRow.missing>0) lines.push(`<span class="source-line missing">Thiếu ${fmt(planRow.missing)}</span>`);
+  if(!lines.length) return '<span class="muted">Không cần nguồn</span>';
+  return lines.join('');
+}
+
+function cardWithdrawFeeSummary(plan){
+  let netNeed=0;
+  Object.values(plan||{}).forEach(row=>{
+    if(!row || row.done) return;
+    (row.lines||[]).forEach(x=>{ netNeed += parseNum(x.amount); });
+  });
+  const rate=Math.max(0, Math.min(0.99, parseNum(CARD_WITHDRAW_FEE_RATE)));
+  const grossNeed = netNeed>0 ? netNeed/(1-rate) : 0;
+  const fee = Math.max(0, grossNeed-netNeed);
+  return {netNeed, grossNeed, fee, rate};
+}
+
+function cardFeeExpenseAmountDong(feeInfo){
+  return Math.round(parseNum(feeInfo && feeInfo.fee) * 1000000);
+}
+function cardFeeExpenseDateISO(){
+  const today=new Date();
+  const todayMonth=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0");
+  const day=(todayMonth===currentMonth) ? today.getDate() : 1;
+  return dueISOForMonth(currentMonth, day);
+}
+function cardFeeExpenseIndex(type="temp"){
+  const plan=getMonthlySpending();
+  const items=plan.items||[];
+  if(type==="temp"){
+    return items.findIndex(r=>r && (r.autoType==="card_withdraw_fee_temp" || r.autoType==="card_withdraw_fee") && r.autoMonth===currentMonth);
+  }
+  return items.findIndex(r=>r && r.autoType==="card_withdraw_fee_actual" && r.autoMonth===currentMonth);
+}
+function isCardFeeExpenseCurrent(feeInfo,type="temp"){
+  const amountDong=cardFeeExpenseAmountDong(feeInfo);
+  const idx=cardFeeExpenseIndex(type);
+  if(idx<0) return false;
+  const item=getMonthlySpending().items[idx];
+  return parseDong(item.amount)===amountDong;
+}
+function buildCardFeeExpenseRow(feeInfo,type="temp"){
+  const amountDong=cardFeeExpenseAmountDong(feeInfo);
+  const isActual=type==="actual";
+  return {
+    date:"",
+    dateISO:cardFeeExpenseDateISO(),
+    name:isActual?"Phí đáo thẻ thực tế":"Phí đáo thẻ tạm tính",
+    amount:amountDong,
+    method:"CK",
+    note:isActual
+      ? `Đã chốt từ kế hoạch đáo thẻ ${pct(parseNum(feeInfo.rate)*100)}; cần nhận ${fmt(parseNum(feeInfo.netNeed))}, rút/quẹt khoảng ${fmt(parseNum(feeInfo.grossNeed))}.`
+      : `Tạm tính ${pct(parseNum(feeInfo.rate)*100)} theo kế hoạch thanh toán thẻ còn lại; sẽ thay đổi nếu nguồn đề xuất/trạng thái thay đổi. Trước khi chốt thực tế, bấm cập nhật lại nếu cần.`,
+    autoType:isActual?"card_withdraw_fee_actual":"card_withdraw_fee_temp",
+    autoMonth:currentMonth,
+    autoUpdatedAt:new Date().toISOString()
+  };
+}
+function upsertCardFeeExpense(feeInfo,type="temp"){
+  const amountDong=cardFeeExpenseAmountDong(feeInfo);
+  if(amountDong<=0) return false;
+  const plan=getMonthlySpending();
+  plan.items ||= [];
+  const row=buildCardFeeExpenseRow(feeInfo,type);
+  const idx=cardFeeExpenseIndex(type);
+  if(idx>=0) plan.items[idx]={...plan.items[idx], ...row};
+  else plan.items.push(row);
+  return true;
+}
+function makeId(prefix="id"){
+  return prefix+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);
+}
+function getCardActualLogs(){
+  const mm=getMonth();
+  mm.cardActuals ||= [];
+  mm.cardActuals.forEach(r=>{ if(!r.id) r.id=makeId("actual"); });
+  return mm.cardActuals;
+}
+function cardNameOptions(selected){
+  const sel=String(selected||"");
+  const matched=(data.cards.find(c=>sel===c.name || sel.startsWith(c.name+" ") || sel.includes(c.name)) || {}).name || (data.cards[0]?.name || "");
+  return data.cards.map(c=>`<option value="${esc(c.name)}" ${matched===c.name?"selected":""}>${esc(c.name)}</option>`).join("");
+}
+function firstPlanSourceName(planRow){
+  const line=(planRow && planRow.lines && planRow.lines[0]) ? planRow.lines[0] : null;
+  return line ? line.name : (data.cards[0]?.name || "");
+}
+function actualFeeRate(row){
+  let r=parseNum(row && row.feeRate);
+  if(!r) r=CARD_WITHDRAW_FEE_RATE*100;
+  if(r>1) r=r/100;
+  return Math.max(0, Math.min(0.99, r));
+}
+function actualWithdraw(row){
+  const gross=parseNum(row && (row.gross!==undefined ? row.gross : row.withdrawAmount));
+  if(gross>0) return gross;
+  const received=parseNum(row && (row.received!==undefined ? row.received : row.need));
+  const fee=parseNum(row && row.feeAmount);
+  if(received>0 && fee>0) return received + fee;
+  const rate=actualFeeRate(row);
+  return (received>0 && rate>0 && rate<1) ? received/(1-rate) : received;
+}
+function actualFee(row){
+  const gross=actualWithdraw(row);
+  const rate=actualFeeRate(row);
+  return Math.max(0, gross*rate);
+}
+function actualReceived(row){
+  return Math.max(0, actualWithdraw(row)-actualFee(row));
+}
+function actualFeeExpenseAmountDong(row){
+  return Math.round(actualFee(row)*1000000);
+}
+function actualFeeExpenseIndex(row){
+  const id=row && row.id;
+  if(!id) return -1;
+  const plan=getMonthlySpending();
+  const items=plan.items||[];
+  return items.findIndex(r=>r && r.autoType==="card_withdraw_fee_actual_log" && r.autoActualId===id && r.autoMonth===currentMonth);
+}
+function isActualFeeExpenseCurrent(row){
+  const idx=actualFeeExpenseIndex(row);
+  if(idx<0) return false;
+  return parseDong(getMonthlySpending().items[idx].amount)===actualFeeExpenseAmountDong(row);
+}
+function buildActualFeeExpenseRow(row){
+  const amountDong=actualFeeExpenseAmountDong(row);
+  return {
+    date:"",
+    dateISO:row.dateISO || cardFeeExpenseDateISO(),
+    name:`Phí rút thẻ - ${row.source||"thẻ"} → ${row.payCard||"thẻ"}`,
+    amount:amountDong,
+    method:"CK",
+    note:`Nhật ký rút thẻ: rút ${fmt(actualWithdraw(row))} từ ${row.source||""}, phí ${pct(actualFeeRate(row)*100)}, nhận lại ${fmt(actualReceived(row))}, trả vào ${row.payCard||"thẻ"}.`,
+    autoType:"card_withdraw_fee_actual_log",
+    autoActualId:row.id,
+    autoMonth:currentMonth,
+    autoUpdatedAt:new Date().toISOString()
+  };
+}
+function upsertActualFeeExpense(row){
+  const amountDong=actualFeeExpenseAmountDong(row);
+  if(amountDong<=0) return false;
+  const plan=getMonthlySpending();
+  plan.items ||= [];
+  const exp=buildActualFeeExpenseRow(row);
+  const idx=actualFeeExpenseIndex(row);
+  if(idx>=0) plan.items[idx]={...plan.items[idx], ...exp};
+  else plan.items.push(exp);
+  row.expensePosted=true;
+  row.expenseAmount=amountDong;
+  row.expenseUpdatedAt=new Date().toISOString();
+  return true;
+}
+function removeActualFeeExpense(row){
+  const idx=actualFeeExpenseIndex(row);
+  if(idx>=0){
+    getMonthlySpending().items.splice(idx,1);
+    return true;
+  }
+  return false;
+}
+function addActualFromPlan(cardName, planRow){
+  const c=data.cards.find(x=>x.name===cardName) || {name:cardName,dueDay:1};
+  const m=cardMonthly(c);
+  const need=parseNum(m.payAmount);
+  const rate=CARD_WITHDRAW_FEE_RATE;
+  const logs=getCardActualLogs();
+  const pushLog=(sourceName, netAmount)=>{
+    const received=parseNum(netAmount);
+    const gross=received>0 ? received/(1-rate) : 0;
+    logs.push({
+      id:makeId("actual"),
+      date:"",
+      dateISO:cardFeeExpenseDateISO(),
+      source:sourceName || firstPlanSourceName(planRow),
+      payCard:cardName,
+      gross,
+      feeRate:rate*100,
+      note:""
+    });
+  };
+  const lines=(planRow && planRow.lines) ? planRow.lines : [];
+  if(lines.length){
+    lines.forEach(x=>pushLog(x.name, x.amount));
+  }else if(need>0){
+    pushLog(firstPlanSourceName(planRow), need);
+  }else{
+    pushLog(firstPlanSourceName(planRow), 0);
+  }
+}
+function renderCardActualLogs(){
+  const tbody=document.querySelector("#cardActualTable tbody");
+  if(!tbody) return;
+  const logs=getCardActualLogs();
+  if(!logs.length){
+    tbody.innerHTML=`<tr><td colspan="8" class="actual-empty">Chưa có giao dịch rút thẻ. Bấm <b>Ghi thực tế</b> ở kế hoạch bên trên sau khi m làm thật.</td></tr>`;
+    const totalEl=document.getElementById("cardActualFeeTotal");
+    if(totalEl) totalEl.textContent=fmt(0);
+    return;
+  }
+  tbody.innerHTML=logs.map((r,i)=>{
+    const withdraw=actualWithdraw(r);
+    const fee=actualFee(r);
+    const received=actualReceived(r);
+    const posted=isActualFeeExpenseCurrent(r);
+    const postedLabel=posted?"Đã ghi CP":"Ghi vào CP";
+    const feeRateValue=((parseNum(r.feeRate)||CARD_WITHDRAW_FEE_RATE*100)).toLocaleString("vi-VN",{maximumFractionDigits:3});
+    return `<tr>
+      <td class="center">
+        <div class="date-field">
+          <input class="date-text" data-t="cardActual" data-i="${i}" data-f="date" placeholder="dd/mm/yyyy" value="${isoToDisplay(r.dateISO||r.date)}">
+          <button type="button" class="date-btn" data-open-date title="Chọn ngày">📅</button>
+          <input type="date" class="date-native" data-t="cardActual" data-i="${i}" data-f="dateISO" value="${r.dateISO||dateValueForInput(r.date||"", currentMonth, 1)}">
+        </div>
+      </td>
+      <td><select class="cell" data-t="cardActual" data-i="${i}" data-f="source">${cardNameOptions(r.source)}</select></td>
+      <td><select class="cell" data-t="cardActual" data-i="${i}" data-f="payCard">${cardNameOptions(r.payCard)}</select></td>
+      <td class="num"><input class="cell money" data-t="cardActual" data-i="${i}" data-f="gross" value="${withdraw?Number(withdraw).toFixed(3).replace(/\.?0+$/,""):""}" inputmode="decimal"></td>
+      <td class="num"><input class="cell money" data-t="cardActual" data-i="${i}" data-f="feeRate" value="${feeRateValue}" inputmode="decimal"></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(received)}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(fee)}</b></td>
+      <td class="center">
+        <button type="button" class="small-btn" data-post-actual-fee="${i}">${postedLabel}</button>
+        <button type="button" class="small-btn danger" data-del-card-actual="${i}" style="margin-top:4px">Xóa</button>
+      </td>
+    </tr>`;
+  }).join("");
+  const total=logs.reduce((sum,row)=>sum+actualFee(row),0);
+  const totalEl=document.getElementById("cardActualFeeTotal");
+  if(totalEl) totalEl.textContent=fmt(total);
+}
+
+let currentMonth = (()=>{
+  try{
+    const meta=JSON.parse(localStorage.getItem(STORE_META_KEY)||"{}");
+    if(/^\d{4}-\d{2}$/.test(meta.currentMonth||"")) return meta.currentMonth;
+  }catch(e){}
+  return nowMonth();
+})();
+let data = load();
+let undoStack = [];
+let redoStack = [];
+let isRestoring = false;
+
+function makeSnapshot(){
+  return JSON.stringify({data:deep(data), currentMonth});
+}
+function recordHistory(){
+  if(isRestoring) return;
+  const snap=makeSnapshot();
+  if(undoStack[undoStack.length-1]!==snap){
+    undoStack.push(snap);
+    if(undoStack.length>60) undoStack.shift();
+  }
+  redoStack=[];
+  updateUndoRedoButtons();
+}
+function restoreSnapshot(snap){
+  if(!snap) return;
+  const obj=JSON.parse(snap);
+  data=obj.data;
+  currentMonth=obj.currentMonth||nowMonth();
+  isRestoring=true;
+  save(true);
+  renderAll();
+  isRestoring=false;
+}
+function undo(){
+  if(!undoStack.length) return;
+  redoStack.push(makeSnapshot());
+  restoreSnapshot(undoStack.pop());
+  updateUndoRedoButtons();
+}
+function redo(){
+  if(!redoStack.length) return;
+  undoStack.push(makeSnapshot());
+  restoreSnapshot(redoStack.pop());
+  updateUndoRedoButtons();
+}
+function updateUndoRedoButtons(){
+  const u=document.getElementById("undoBtn");
+  const r=document.getElementById("redoBtn");
+  if(u) u.disabled=!undoStack.length;
+  if(r) r.disabled=!redoStack.length;
+}
+
+function getLocalMeta(){
+  try{return JSON.parse(localStorage.getItem(STORE_META_KEY)||"{}");}
+  catch(e){return {};}
+}
+
+function normalizeLoadedData(d){
+  if(!d || typeof d!=="object") return deep(DEFAULT);
+  return {
+    cards:Array.isArray(d.cards)?d.cards:deep(DEFAULT.cards),
+    loans:Array.isArray(d.loans)?d.loans.map((l,idx)=>{
+      const base={...deep(DEFAULT.loans[idx]||{}), ...l};
+      const oldMonthly=parseNum(l.interestMonthly ?? l.interest ?? 0);
+      const credit=parseNum(base.credit);
+      const derivedRate=credit ? oldMonthly/credit*12*100 : 0;
+      return {...base, borrower:base.borrower||"", paidPrincipal:base.paidPrincipal||0, annualRate:base.annualRate ?? derivedRate, termMonths:base.termMonths||0, startDateISO:base.startDateISO||dateValueForInput(base.startDate||"", currentMonth, 1), payDateISO:base.payDateISO||dateValueForInput(base.payDate||"", currentMonth, 1)};
+    }):deep(DEFAULT.loans),
+    monthly:d.monthly||{},
+    monthlySpending:d.monthlySpending||{},
+    deletedMonths:(d.deletedMonths && typeof d.deletedMonths==="object")?d.deletedMonths:{},
+    freeNotes:Array.isArray(d.freeNotes)?d.freeNotes:deep(DEFAULT.freeNotes),
+    fund:Array.isArray(d.fund)?d.fund:deep(DEFAULT.fund),
+    expenses:Array.isArray(d.expenses)?d.expenses:deep(DEFAULT.expenses),
+    hui:Array.isArray(d.hui)?d.hui:deep(DEFAULT.hui),
+    huiSummary:Array.isArray(d.huiSummary)?d.huiSummary:deep(DEFAULT.huiSummary)
+  };
+}
+
+function hasFirebaseConfig(){
+  return FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && !String(FIREBASE_CONFIG.apiKey).startsWith("DAN_") && FIREBASE_CONFIG.projectId && !String(FIREBASE_CONFIG.projectId).startsWith("DAN_");
+}
+function setSyncStatus(text){
+  const status=document.getElementById("autosaveStatus");
+  if(status && status.textContent!==text) status.textContent=text;
+}
+function setStableSyncStatus(){
+  setSyncStatus("Saved ✓");
+}
+function updateAuthButtons(){
+  const login=document.getElementById("loginCloudBtn");
+  const logout=document.getElementById("logoutCloudBtn");
+  if(login) login.style.display="none";
+  if(logout) logout.style.display="none";
+}
+
+function isInputActive(){
+  const a=document.activeElement;
+  return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+}
+function deferRemoteApply(remote){
+  cloudSync.pendingRemote=remote;
+  clearTimeout(cloudSync.applyTimer);
+  cloudSync.applyTimer=setTimeout(()=>{
+    if(cloudSync.pendingRemote && !isInputActive() && !cloudSync.localDirty){
+      const r=cloudSync.pendingRemote;
+      cloudSync.pendingRemote=null;
+      applyRemoteState(r);
+    }
+  },2500);
+}
+function scheduleCloudSave(){
+  setSyncStatus("Chờ Save ~");
+  if(!cloudSync.ready || cloudSync.applying || !cloudSync.docRef || !cloudSync.mods) return;
+  clearTimeout(cloudSync.saveTimer);
+  cloudSync.saveTimer=setTimeout(pushCloudNow,CLOUD_SAVE_DELAY_MS);
+}
+async function pushCloudNow(){
+  if(!cloudSync.ready || cloudSync.applying || !cloudSync.docRef || !cloudSync.mods) return;
+  const payloadJSON=JSON.stringify({data, currentMonth});
+  if(payloadJSON===cloudSync.lastPayloadJSON){
+    cloudSync.localDirty=false;
+    setStableSyncStatus();
+    return;
+  }
+  const updatedAtMs=Date.now();
+  const payload={
+    payload:deep(data),
+    currentMonth,
+    updatedAtMs,
+    deviceId:DEVICE_ID,
+    userEmail:"public"
+  };
+  cloudSync.lastWriteMs=updatedAtMs;
+  cloudSync.lastPayloadJSON=payloadJSON;
+  await cloudSync.mods.setDoc(cloudSync.docRef,payload,{merge:true});
+  cloudSync.localDirty=false;
+  cloudSync.pendingRemote=null;
+  setStableSyncStatus();
+}
+function applyRemoteState(remote, force=false){
+  if(!remote || !remote.payload) return;
+  const remoteMs=Number(remote.updatedAtMs||0);
+  if(!force && remoteMs && remoteMs<=cloudSync.lastRemoteMs) return;
+  if(!force && remote.deviceId===DEVICE_ID && remoteMs && remoteMs<=cloudSync.lastWriteMs) return;
+  if(!force && cloudSync.localDirty){
+    return;
+  }
+  if(!force && isInputActive()){
+    deferRemoteApply(remote);
+    return;
+  }
+  const localMeta=getLocalMeta();
+  if(!force && localMeta.updatedAtMs && remoteMs && Number(localMeta.updatedAtMs)>remoteMs && cloudSync.ready){
+    scheduleCloudSave();
+    return;
+  }
+  cloudSync.applying=true;
+  data=normalizeLoadedData(remote.payload);
+  if(/^\d{4}-\d{2}$/.test(remote.currentMonth||"")) currentMonth=remote.currentMonth;
+  localStorage.setItem(STORE_KEY,JSON.stringify(data));
+  localStorage.setItem(STORE_META_KEY,JSON.stringify({updatedAtMs:remoteMs||Date.now(),currentMonth,deviceId:DEVICE_ID,source:"cloud"}));
+  cloudSync.lastRemoteMs=remoteMs||Date.now();
+  cloudSync.lastPayloadJSON=JSON.stringify({data, currentMonth});
+  renderAll();
+  cloudSync.applying=false;
+  setStableSyncStatus();
+}
+async function loginCloud(){
+  setStableSyncStatus();
+}
+async function logoutCloud(){
+  setStableSyncStatus();
+}
+async function initCloudSync(){
+  if(cloudSync.initialized) return;
+  cloudSync.initialized=true;
+  updateAuthButtons();
+  if(!hasFirebaseConfig()){
+    setSyncStatus("Saved ✓");
+    return;
+  }
+  try{
+    setSyncStatus("Chờ Save ~");
+    const appMod=await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
+    const fsMod=await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+    cloudSync.app=appMod.initializeApp(FIREBASE_CONFIG);
+    cloudSync.db=fsMod.getFirestore(cloudSync.app);
+    cloudSync.mods={
+      doc:fsMod.doc,
+      getDoc:fsMod.getDoc,
+      setDoc:fsMod.setDoc,
+      onSnapshot:fsMod.onSnapshot
+    };
+    cloudSync.docRef=fsMod.doc(cloudSync.db,FIREBASE_PUBLIC_COLLECTION,FIREBASE_PUBLIC_DOC_ID);
+    setSyncStatus("Chờ Save ~");
+    const snap=await fsMod.getDoc(cloudSync.docRef);
+    const localMeta=getLocalMeta();
+    cloudSync.ready=true;
+    if(snap.exists()){
+      const remote=snap.data();
+      const remoteMs=Number(remote.updatedAtMs||0);
+      if(localMeta.updatedAtMs && Number(localMeta.updatedAtMs)>remoteMs){
+        await pushCloudNow();
+      }else{
+        applyRemoteState(remote,true);
+      }
+    }else{
+      await pushCloudNow();
+    }
+    if(cloudSync.unsub){cloudSync.unsub(); cloudSync.unsub=null;}
+    cloudSync.unsub=fsMod.onSnapshot(cloudSync.docRef,(docSnap)=>{
+      if(docSnap.exists()) applyRemoteState(docSnap.data());
+    },(err)=>{console.warn(err); setSyncStatus("Lỗi Save");});
+    setStableSyncStatus();
+  }catch(e){
+    console.warn(e);
+    setSyncStatus("Lỗi Save");
+  }
+}
+
+function load(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw) return normalizeLoadedData(JSON.parse(raw));
+  }catch(e){console.warn(e);}
+  return deep(DEFAULT);
+}
+function save(silent=false){
+  const updatedAtMs=Date.now();
+  localStorage.setItem(STORE_KEY,JSON.stringify(data));
+  localStorage.setItem(STORE_META_KEY,JSON.stringify({updatedAtMs,currentMonth,deviceId:DEVICE_ID,source:"local"}));
+  if(!cloudSync.applying){
+    cloudSync.localDirty=true;
+    cloudSync.localEditMs=updatedAtMs;
+    scheduleCloudSave();
+  }
+  const status=document.getElementById("autosaveStatus");
+  if(status){
+    if(hasFirebaseConfig()){
+      status.textContent = cloudSync.localDirty ? "Chờ Save ~" : "Saved ✓";
+    }else{
+      status.textContent="Saved ✓";
+    }
+  }
+  if(!silent){
+    const b=document.getElementById("save");
+    if(b){ b.textContent="Saved ✓"; setTimeout(()=>b.textContent="Lưu",900); }
+  }
+}
+function getMonth(){
+  if(!data.monthly[currentMonth]){
+    const prev=data.monthly[addMonth(currentMonth,-1)]||{};
+    data.monthly[currentMonth]={cards:{}, cardPayments:[], cardActuals:[]};
+    data.cards.forEach(c=>{
+      const p=prev.cards && prev.cards[c.name] ? prev.cards[c.name] : {};
+      data.monthly[currentMonth].cards[c.name]={
+        debt:p.debt!==undefined?p.debt:0,
+        payAmount:0,
+        paidAmount:0,
+        payDate:dueDateForMonth(currentMonth,c.dueDay),
+        payDateISO:dueISOForMonth(currentMonth,c.dueDay),
+        plannedUse:0,
+        status:"Chưa xử lý",
+        paymentSource:p.paymentSource||"",
+        note:p.note||""
+      };
+    });
+    data.monthly[currentMonth].cardPayments=[];
+    data.monthly[currentMonth].cardActuals=[];
+  }else{
+    data.monthly[currentMonth].cards ||= {};
+    data.monthly[currentMonth].cardPayments ||= [];
+    data.monthly[currentMonth].cardActuals ||= [];
+    data.cards.forEach(c=>{
+      data.monthly[currentMonth].cards[c.name] ||= {debt:0,payAmount:0,paidAmount:0,payDate:dueDateForMonth(currentMonth,c.dueDay),payDateISO:dueISOForMonth(currentMonth,c.dueDay),plannedUse:0,status:"Chưa xử lý",paymentSource:"",note:""};
+      data.monthly[currentMonth].cards[c.name].paidAmount ??= 0;
+      data.monthly[currentMonth].cards[c.name].paymentSource ??= "";
+      if(!data.monthly[currentMonth].cards[c.name].payDateISO) data.monthly[currentMonth].cards[c.name].payDateISO=dateValueForInput(data.monthly[currentMonth].cards[c.name].payDate,currentMonth,c.dueDay);
+    });
+  }
+  return data.monthly[currentMonth];
+}
+function cardMonthly(c){return getMonth().cards[c.name]||{}}
+function getMonthlySpending(){
+  data.monthlySpending ||= {};
+  if(!data.monthlySpending[currentMonth]){
+    data.monthlySpending[currentMonth] = {
+      salary:0,
+      budget:0,
+      incomes:[],
+      items:[]
+    };
+  }
+  data.monthlySpending[currentMonth].salary ||= 0;
+  data.monthlySpending[currentMonth].budget ||= 0;
+  data.monthlySpending[currentMonth].incomes ||= [];
+  data.monthlySpending[currentMonth].items ||= [];
+  return data.monthlySpending[currentMonth];
+}
+function monthlyIncomeTotal(plan){
+  plan ||= {};
+  const base=parseDong(plan.salary);
+  const extra=(Array.isArray(plan.incomes)?plan.incomes:[]).reduce((s,r)=>s+parseDong(r.amount),0);
+  return base + extra;
+}
+function salaryUseSourceMonth(monthKey){
+  return addMonth(monthKey,-1);
+}
+function salaryUsableForMonth(monthKey){
+  data.monthlySpending ||= {};
+  const plan=data.monthlySpending[monthKey] || {};
+  return parseDong(plan.salary);
+}
+function extraIncomeForMonth(monthKey){
+  data.monthlySpending ||= {};
+  const plan=data.monthlySpending[monthKey] || {};
+  const incomes=Array.isArray(plan.incomes)?plan.incomes:[];
+  return incomes.reduce((sum,r)=>sum+parseDong(r.amount),0);
+}
+function incomeUsableForMonth(monthKey){
+  return salaryUsableForMonth(monthKey) + extraIncomeForMonth(monthKey);
+}
+function monthEndDebtDong(monthKey){
+  const month=data.monthly && data.monthly[monthKey] ? data.monthly[monthKey] : null;
+  const cards=month && month.cards ? month.cards : {};
+  return Object.values(cards).reduce((sum,row)=>sum+parseNum(row && row.debt),0)*1000000;
+}
+function isMonthEndDebtVisible(monthKey){
+  const m=String(monthKey||"").match(/^(\d{4})-(\d{2})$/);
+  if(!m) return false;
+  const realNowMonth=nowMonth();
+  if(monthKey < realNowMonth) return true;
+  if(monthKey > realNowMonth) return false;
+  const today=new Date();
+  return today.getDate()>=28;
+}
+function isDeletedMonth(monthKey){
+  data.deletedMonths ||= {};
+  return !!data.deletedMonths[monthKey];
+}
+function markDeletedMonth(monthKey){
+  data.deletedMonths ||= {};
+  data.deletedMonths[monthKey]=Date.now();
+}
+function restoreDeletedMonth(monthKey){
+  if(data.deletedMonths) delete data.deletedMonths[monthKey];
+}
+let deletingMonthKey="";
+async function deleteManagedMonth(monthKey, btn){
+  monthKey=String(monthKey||"");
+  if(!/^\d{4}-\d{2}$/.test(monthKey)) return;
+  if(deletingMonthKey===monthKey) return;
+  if(monthKey===currentMonth){
+    alert("Không xóa tháng đang quản lý. Hãy chuyển sang tháng khác trước.");
+    return;
+  }
+  if(!confirm("Xóa toàn bộ dữ liệu tháng " + monthName(monthKey) + " khỏi Tab 1 và Tab 3?")) return;
+  deletingMonthKey=monthKey;
+  if(btn){ btn.disabled=true; btn.textContent="Đang xóa..."; }
+  recordHistory();
+  if(data.monthlySpending) delete data.monthlySpending[monthKey];
+  if(data.monthly) delete data.monthly[monthKey];
+  markDeletedMonth(monthKey);
+  save(true);
+  renderAll();
+  try{
+    if(cloudSync.ready) await pushCloudNow();
+  }catch(e){
+    console.warn(e);
+  }finally{
+    deletingMonthKey="";
+  }
+}
+function avail(c){return Math.max(0, parseNum(c.limit)-parseNum(cardMonthly(c).debt))}
+function statusBadge(util,available){
+  if(util>=90 || available<=5) return ['', 'red'];
+  if(util>=75 || available<=20) return ['', 'orange'];
+  return ['', 'green'];
+}
+function cardLimitClassByName(name){
+  const c=data.cards.find(x=>x.name===name);
+  if(!c) return 'green';
+  const m=cardMonthly(c);
+  const a=avail(c);
+  const util=parseNum(c.limit)?parseNum(m.debt)/parseNum(c.limit)*100:0;
+  return statusBadge(util,a)[1];
+}
+function totals(){
+  const limit=data.cards.reduce((s,c)=>s+parseNum(c.limit),0);
+  const debt=data.cards.reduce((s,c)=>s+parseNum(cardMonthly(c).debt),0);
+  const available=data.cards.reduce((s,c)=>s+avail(c),0);
+  const payCards=data.cards.reduce((s,c)=>s+parseNum(cardMonthly(c).payAmount),0);
+  const paidCards=data.cards.reduce((s,c)=>s+parseNum(cardMonthly(c).paidAmount),0);
+  const loanPay=data.loans.reduce((s,l)=>s+parseNum(l.monthly),0);
+  return {limit,debt,available,util:limit?debt/limit*100:0,payCards,paidCards,loanPay,need:payCards+loanPay};
+}
+function renderMonthSelect(){
+  const sel=document.getElementById("monthSelect");
+  if(!sel) return;
+  data.deletedMonths ||= {};
+  const months=new Set([currentMonth]);
+  Object.keys(data.monthly||{}).forEach(m=>{
+    if(isDeletedMonth(m) && m!==currentMonth) return;
+    const mm=data.monthly[m]||{};
+    const hasCardData=Object.values(mm.cards||{}).some(r=>parseNum(r.debt)||parseNum(r.payAmount)||parseNum(r.paidAmount)||String(r.status||"")!=="Chưa xử lý"||String(r.note||"").trim());
+    const hasPayRows=(mm.cardPayments||[]).length>0 || (mm.cardActuals||[]).length>0;
+    if(hasCardData || hasPayRows) months.add(m);
+  });
+  Object.keys(data.monthlySpending||{}).forEach(m=>{
+    if(isDeletedMonth(m) && m!==currentMonth) return;
+    const r=data.monthlySpending[m]||{};
+    if(parseDong(r.salary)||parseDong(r.budget)||(r.items||[]).length||(r.incomes||[]).length) months.add(m);
+  });
+  sel.innerHTML=[...months].sort().map(m=>`<option value="${m}" ${m===currentMonth?"selected":""}>${monthName(m)}</option>`).join("");
+}
+function ensureMonthlySpendingFor(monthKey, prevKey){
+  data.monthlySpending ||= {};
+  if(!data.monthlySpending[monthKey]){
+    const prev=data.monthlySpending[prevKey]||{};
+    data.monthlySpending[monthKey]={
+      salary:0,
+      budget:parseDong(prev.budget||0),
+      incomes:[],
+      items:[]
+    };
+  }
+  data.monthlySpending[monthKey].salary ||= 0;
+  data.monthlySpending[monthKey].budget ||= 0;
+  data.monthlySpending[monthKey].incomes ||= [];
+  data.monthlySpending[monthKey].items ||= [];
+  return data.monthlySpending[monthKey];
+}
+function switchMonth(monthKey, shouldRecord=false){
+  if(!/^\d{4}-\d{2}$/.test(String(monthKey||""))) return;
+  if(shouldRecord) recordHistory();
+  const prevKey=currentMonth;
+  currentMonth=monthKey;
+  restoreDeletedMonth(currentMonth);
+  getMonth();
+  ensureMonthlySpendingFor(currentMonth,prevKey);
+  save(true);
+  renderAll();
+}
+function createNextMonth(){
+  const next=addMonth(currentMonth,1);
+  recordHistory();
+  const prevKey=currentMonth;
+  currentMonth=next;
+  restoreDeletedMonth(currentMonth);
+  getMonth();
+  ensureMonthlySpendingFor(next,prevKey);
+  save(true);
+  renderAll();
+  const salaryInput=document.getElementById("monthlySalaryInput");
+  if(salaryInput && document.getElementById("tab3")?.classList.contains("active")) salaryInput.focus();
+}
+
+function dueAlertLabel(days){
+  if(days<0) return "Quá hạn " + Math.abs(days) + " ngày";
+  if(days===0) return "Hôm nay phải đóng";
+  if(days<=3) return "Còn " + days + " ngày";
+  if(days<=7) return "Sắp tới hạn: còn " + days + " ngày";
+  return "Lịch gần nhất: còn " + days + " ngày";
+}
+function autoSourceShort(planRow){
+  if(!planRow) return "Không có số tiền TT";
+  if(planRow.done) return "Đã xử lý";
+  const parts=(planRow.lines||[]).map(x=>`${x.name} ${fmt(x.amount)}`);
+  if(planRow.missing>0) parts.push(`Thiếu ${fmt(planRow.missing)}`);
+  return parts.length ? parts.join(" + ") : "Không cần nguồn";
+}
+function renderCardDueAlerts(rows, autoPaymentPlan){
+  const box=document.getElementById("cardDueAlerts");
+  if(!box) return;
+  const today=new Date();
+  const items=(rows||[]).map(({c,m})=>{
+    const iso=m.payDateISO || dateValueForInput(m.payDate||"", currentMonth, c.dueDay);
+    const due=parseDateFlexible(iso);
+    const days=due ? dayDiff(today,due) : 9999;
+    return {c,m,iso,days,amount:parseNum(m.payAmount),status:m.status||"Chưa xử lý"};
+  }).filter(x=>x.amount>0 && x.status!=="Đã xử lý").sort((a,b)=>a.days-b.days);
+  if(!items.length){
+    box.innerHTML='<div class="due-alert-empty">Không có thẻ nào cần nhắc trong tháng này.</div>';
+    return;
+  }
+  let show=items.filter(x=>x.days<=7);
+  if(!show.length) show=items.slice(0,3);
+  box.innerHTML='<div class="due-alert-grid">'+show.map(x=>{
+    const cls=(x.days<=3?"red":(x.days<=7?"orange":"green"));
+    const source=autoSourceShort(autoPaymentPlan && autoPaymentPlan[x.c.name]);
+    return `<div class="due-alert-item ${cls}">
+      <div class="top"><span class="name">${esc(x.c.name)}</span><span class="amount">${fmt(x.amount)}</span></div>
+      <div class="meta"><b>${dueAlertLabel(x.days)}</b> · Ngày TT: ${isoToDisplay(x.iso)}</div>
+      <div class="meta" style="margin-top:5px">Nguồn đề xuất: <b>${esc(source)}</b></div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function renderCards(){
+  const t=totals();
+  document.getElementById("kLimit").textContent=fmt(t.limit);
+  document.getElementById("kDebt").textContent=fmt(t.debt);
+  document.getElementById("kAvail").textContent=fmt(t.available);
+  document.getElementById("kNeed").textContent=fmt(t.need);
+  document.getElementById("kUtil").textContent="Tỷ lệ dùng "+pct(t.util);
+
+  const totalLimit=data.cards.reduce((s,c)=>s+parseNum(c.limit),0);
+  const totalDebt=data.cards.reduce((s,c)=>s+parseNum(cardMonthly(c).debt),0);
+  const totalAvail=data.cards.reduce((s,c)=>s+avail(c),0);
+  const totalPay=data.cards.reduce((s,c)=>s+parseNum(cardMonthly(c).payAmount),0);
+  const totalPaid=data.cards.reduce((s,c)=>s+parseNum(cardMonthly(c).paidAmount),0);
+
+  const elLimit=document.getElementById("cardTotalLimit");
+  if(elLimit){
+    elLimit.textContent=fmt(totalLimit);
+    document.getElementById("cardTotalDebt").textContent=fmt(totalDebt);
+    document.getElementById("cardTotalAvail").textContent=fmt(totalAvail);
+    document.getElementById("cardTotalPay").textContent=fmt(totalPay);
+    const paidEl=document.getElementById("cardTotalPaid");
+    if(paidEl) paidEl.textContent=fmt(totalPaid);
+  }
+
+  const tbody=document.querySelector("#cardsTable tbody");
+  tbody.innerHTML=data.cards.map((c,i)=>{
+    const m=cardMonthly(c); 
+    const a=avail(c); 
+    const util=parseNum(c.limit)?parseNum(m.debt)/parseNum(c.limit)*100:0;
+    const [,cls]=statusBadge(util,a);
+    return `<tr>
+      <td><b>${c.name}</b></td>
+      <td class="center"><input class="cell" data-t="card" data-i="${i}" data-f="closeDay" value="${c.closeDay}"></td>
+      <td class="center"><input class="cell" data-t="card" data-i="${i}" data-f="dueDay" value="${c.dueDay}"></td>
+      <td class="center" style="background:#f8fafc"><span class="badge blue" title="Tự tính: rút sau chốt ${isoToDisplay(maxGraceInfo(c,currentMonth).bestTxISO)} · trả ${isoToDisplay(maxGraceInfo(c,currentMonth).dueISO)}">${maxGraceInfo(c,currentMonth).days} ngày</span></td>
+      <td class="num"><input class="cell money" data-t="card" data-i="${i}" data-f="limit" value="${c.limit}"></td>
+      <td class="num"><input class="cell money" data-t="monthCard" data-card="${c.name}" data-f="debt" value="${m.debt}"></td>
+      <td class="num" style="background:#f8fafc"><div class="avail-info avail-${cls}"><b>${fmt(a)}</b><span class="avail-line"><small>${pct(util)}</small></span></div></td>
+      <td class="num"><input class="cell money" data-t="monthCard" data-card="${c.name}" data-f="payAmount" value="${m.payAmount}"></td>
+      <td class="num"><input class="cell money" data-t="monthCard" data-card="${c.name}" data-f="paidAmount" value="${m.paidAmount||0}" title="Nhập số đã thanh toán trong tháng. Khi đổi số này, dư nợ và số tiền TT sẽ tự trừ theo phần tăng thêm."></td>
+      <td class="center">
+        <div class="date-field">
+          <input class="date-text" data-t="monthCard" data-card="${c.name}" data-f="payDate" placeholder="dd/mm/yyyy" value="${isoToDisplay(m.payDateISO||dateValueForInput(m.payDate,currentMonth,c.dueDay))}">
+          <button type="button" class="date-btn" data-open-date title="Chọn ngày">📅</button>
+          <input type="date" class="date-native" data-t="monthCard" data-card="${c.name}" data-f="payDateISO" value="${m.payDateISO||dateValueForInput(m.payDate,currentMonth,c.dueDay)}">
+        </div>
+      </td>
+      <td class="center" style="background:#f8fafc"><span class="badge blue">ngày ${dayAfter(c.closeDay)}</span></td>
+      <td class="status-cell"><select class="cell status-select" data-t="monthCard" data-card="${c.name}" data-f="status">${["Chưa xử lý","Thanh toán 1 phần","Đã xử lý","Tạm hoãn"].map(s=>`<option ${m.status===s?"selected":""}>${s}</option>`).join("")}</select></td>
+    </tr>`;
+  }).join("");
+
+  const payBody=document.querySelector("#cardPayTable tbody");
+  const payRows=data.cards
+    .map(c=>({c, m:cardMonthly(c)}))
+    .filter(x=>parseNum(x.m.payAmount)>0 || String(x.m.status||"")!=="Chưa xử lý")
+    .sort(compareCardDueNearest);
+  const rows = payRows.length ? payRows : data.cards
+    .map(c=>({c,m:cardMonthly(c)}))
+    .sort(compareCardDueNearest);
+  const autoPaymentPlan=buildAutoPaymentPlan(rows);
+  payBody.innerHTML=rows.map(({c,m})=>`<tr>
+    <td class="center"><b>${isoToDisplay(m.payDateISO||m.payDate||dueDateForMonth(currentMonth,c.dueDay))}</b></td>
+    <td><span class="plan-card-name plan-${cardLimitClassByName(c.name)}">${c.name}</span></td>
+    <td class="num">${fmt(m.payAmount||0)}</td>
+    <td><div class="auto-source">${renderAutoSource(autoPaymentPlan[c.name])}</div></td>
+    <td class="${statusClass(m.status)}">${m.status||"Chưa xử lý"}</td>
+    <td class="center"><button type="button" class="small-btn" data-add-card-actual="${esc(c.name)}">Ghi thực tế</button></td>
+  </tr>`).join("");
+
+  renderCardActualLogs();
+  renderCardDueAlerts(rows, autoPaymentPlan);
+
+  const alerts=[];
+  const feeInfo=cardWithdrawFeeSummary(autoPaymentPlan);
+  if(feeInfo.netNeed>0){
+    const tempSaved=isCardFeeExpenseCurrent(feeInfo,"temp");
+    const tempButton=tempSaved
+      ? `<span class="saved-pill">Tạm tính đã cập nhật</span>`
+      : `<button type="button" class="small-btn" data-add-card-fee-temp data-fee="${feeInfo.fee}" data-net="${feeInfo.netNeed}" data-gross="${feeInfo.grossNeed}">+ Cập nhật phí tạm tính</button>`;
+    alerts.push(`<div class="alert orange"><b>Phí đáo dự kiến còn lại:</b> ${fmt(feeInfo.fee)} <div class="fee-action-row">${tempButton}</div></div>`);
+  }
+  const actualLogs=getCardActualLogs();
+  if(actualLogs.length){
+    const actualTotal=actualLogs.reduce((s,r)=>s+actualFee(r),0);
+    const unposted=actualLogs.filter(r=>!isActualFeeExpenseCurrent(r)).reduce((s,r)=>s+actualFee(r),0);
+    alerts.push(`<div class="alert green"><b>Phí rút thẻ thực tế đã ghi nhận:</b> ${fmt(actualTotal)}</div>`);
+  }
+  data.cards.forEach(c=>{
+    const m=cardMonthly(c), a=avail(c), util=parseNum(c.limit)?parseNum(m.debt)/parseNum(c.limit)*100:0;
+    if(util>=90 || a<=5) alerts.push(`<div class="alert red"><b>${c.name}</b> đang căng: dư nợ ${fmt(m.debt)} / hạn mức ${fmt(c.limit)}, HM còn lại ${fmt(a)}.</div>`);
+    else if(util>=75 || a<=20) alerts.push(`<div class="alert orange"><b>${c.name}</b> cần theo dõi: tỷ lệ dùng ${pct(util)}, HM còn lại ${fmt(a)}.</div>`);
+  });
+  if(!alerts.length) alerts.push(`<div class="alert green">Các thẻ đang tạm ổn theo dữ liệu tháng này.</div>`);
+  document.getElementById("alerts").innerHTML=alerts.join("");
+}
+
+function renderLoans(){
+  const body=document.querySelector("#loansTable tbody");
+  body.innerHTML=data.loans.map((l,i)=>{
+    const monthsPaid = monthsPaidAuto(l);
+    const monthlyRate = loanMonthlyRate(l);
+    const monthlyInterest = loanMonthlyInterest(l);
+    const interestPaid = loanInterestPaid(l);
+    const totalPaid = loanTotalPaid(l);
+    const startIso = l.startDateISO || dateValueForInput(l.startDate||"", currentMonth, 1);
+    const dueIso = loanDueISO(l);
+    return `<tr>
+      <td><input class="cell" data-t="loan" data-i="${i}" data-f="name" value="${l.name||""}"></td>
+      <td><input class="cell" data-t="loan" data-i="${i}" data-f="borrower" value="${l.borrower||""}"></td>
+      <td class="num"><input class="cell money" data-t="loan" data-i="${i}" data-f="credit" value="${l.credit||0}"></td>
+      <td class="num"><input class="cell money" data-t="loan" data-i="${i}" data-f="debt" value="${l.debt||0}"></td>
+      <td class="center">
+        <div class="date-field">
+          <input class="date-text" data-t="loan" data-i="${i}" data-f="startDate" placeholder="dd/mm/yyyy" value="${isoToDisplay(startIso||l.startDate||"")}">
+          <button type="button" class="date-btn" data-open-date title="Chọn ngày vay">📅</button>
+          <input type="date" class="date-native" data-t="loan" data-i="${i}" data-f="startDateISO" value="${startIso}">
+        </div>
+      </td>
+      <td class="num"><input class="cell money" data-t="loan" data-i="${i}" data-f="termMonths" value="${l.termMonths||0}"></td>
+      <td class="center" style="background:#f8fafc"><b>${dueIso ? isoToDisplay(dueIso) : ""}</b></td>
+      <td class="num"><input class="cell money" data-t="loan" data-i="${i}" data-f="annualRate" value="${l.annualRate||0}"></td>
+      <td class="num" style="background:#f8fafc"><b>${monthlyRate.toLocaleString("vi-VN",{maximumFractionDigits:3})}%</b></td>
+      <td class="num" style="background:#f8fafc"><b>${monthsPaid}</b></td>
+      <td class="num"><input class="cell money" data-t="loan" data-i="${i}" data-f="paidPrincipal" value="${l.paidPrincipal||0}"></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(monthlyInterest)}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(interestPaid)}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(totalPaid)}</b></td>
+      <td class="num"><input class="cell money" data-t="loan" data-i="${i}" data-f="monthly" value="${l.monthly||0}"></td>
+      <td class="center"><button class="small-btn" data-delloan="${i}">Xóa</button></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderSavings(){
+  data.freeNotes ||= deep(DEFAULT.freeNotes);
+  const notesBody=document.querySelector("#freeNotesTable tbody");
+  if(notesBody){
+    notesBody.innerHTML=data.freeNotes.map((r,i)=>`<tr>
+      <td class="center"><b>${i+1}</b></td>
+      <td><textarea class="cell free-note" data-t="freeNotes" data-i="${i}" data-f="text" placeholder="Ghi chú tự do dòng ${i+1}">${r.text||""}</textarea></td>
+      <td class="center"><button class="small-btn" data-delfreenote="${i}">Xóa</button></td>
+    </tr>`).join("");
+  }
+
+  const fundBody=document.querySelector("#fundTable tbody");
+  fundBody.innerHTML=data.fund.map((r,i)=>`<tr>
+    <td><input class="cell" data-t="fund" data-i="${i}" data-f="label" value="${r.label||""}"></td>
+    <td class="num"><input class="cell money" data-t="fund" data-i="${i}" data-f="anh" value="${r.anh||0}"></td>
+    <td class="num"><input class="cell money" data-t="fund" data-i="${i}" data-f="duy" value="${r.duy||0}"></td>
+    <td><input class="cell" data-t="fund" data-i="${i}" data-f="note" value="${r.note||""}"></td>
+    <td class="center"><button class="small-btn" style="padding:6px 7px" data-delfund="${i}">Xóa</button></td>
+  </tr>`).join("");
+
+  const fundAnhTotal=data.fund.reduce((s,r)=>s+parseNum(r.anh),0);
+  const fundDuyTotal=data.fund.reduce((s,r)=>s+parseNum(r.duy),0);
+  const fundAllTotal=fundAnhTotal+fundDuyTotal;
+  const fundTotalAnhEl=document.getElementById("fundTotalAnh");
+  if(fundTotalAnhEl){
+    fundTotalAnhEl.textContent=fmt(fundAnhTotal);
+    document.getElementById("fundTotalDuy").textContent=fmt(fundDuyTotal);
+    document.getElementById("fundTotalAll").textContent="Tổng cộng: "+fmt(fundAllTotal);
+  }
+
+  const expBody=document.querySelector("#expenseTable tbody");
+  expBody.innerHTML=data.expenses.map((r,i)=>`<tr>
+    <td><input class="cell" data-t="expense" data-i="${i}" data-f="name" value="${r.name||""}"></td>
+    <td class="num"><input class="cell money" data-t="expense" data-i="${i}" data-f="amount" value="${r.amount||0}"></td>
+    <td><input class="cell" data-t="expense" data-i="${i}" data-f="note" value="${r.note||""}"></td>
+    <td class="center"><button class="small-btn" style="padding:6px 7px" data-delexp="${i}">Xóa</button></td>
+  </tr>`).join("");
+
+  const expenseTotal=data.expenses.reduce((s,r)=>s+parseNum(r.amount),0);
+  const expenseTotalEl=document.getElementById("expenseTotalAmount");
+  if(expenseTotalEl) expenseTotalEl.textContent=fmt(expenseTotal);
+
+  data.hui ||= deep(DEFAULT.hui);
+  if(!Array.isArray(data.hui) || !data.hui.length) data.hui=deep(DEFAULT.hui);
+  const huiDetailBody=document.querySelector("#huiTable tbody");
+  if(huiDetailBody){
+    huiDetailBody.innerHTML=data.hui.map((r,i)=>`<tr>
+      <td class="center"><input class="cell" data-t="hui" data-i="${i}" data-f="date" value="${r.date||""}"></td>
+      <td class="num"><input class="cell money" data-t="hui" data-i="${i}" data-f="amount" value="${fmtDongInput(huiAmountDong(r.amount))}"></td>
+      <td><input class="cell" data-t="hui" data-i="${i}" data-f="note" value="${r.note||""}"></td>
+      <td class="center"><button class="small-btn" style="padding:6px 7px" data-delhui="${i}">Xóa</button></td>
+    </tr>`).join("");
+    const huiDetailTotal=data.hui.reduce((s,r)=>s+huiAmountDong(r.amount),0);
+    const huiDetailTotalEl=document.getElementById("huiDetailTotal");
+    if(huiDetailTotalEl) huiDetailTotalEl.textContent=fmtDong(huiDetailTotal);
+  }
+
+  data.huiSummary ||= deep(DEFAULT.huiSummary);
+  const huiBody=document.querySelector("#huiSummaryTable tbody");
+  let sumCurrent=0,sumFinal=0,sumProfit=0,totalActualPaid=0,maxFace=0;
+  huiBody.innerHTML=data.huiSummary.map((r,i)=>{
+    const face = parseNum(r.faceValue);
+    const monthly = parseNum(r.monthlyPay);
+    const totalMonths = parseNum(r.totalMonths);
+    const paidMonths = calcHuiPaidMonths(r);
+    r.paidMonthsAuto = paidMonths;
+    const scheduleValue = face * paidMonths;
+    const actualPaid = monthly * paidMonths;
+    const profit = scheduleValue - actualPaid;
+    const remainingPeriods = totalMonths - paidMonths;
+    const currentValue = scheduleValue + (remainingPeriods - 1) * monthly;
+    const finalValue = face * (totalMonths - 1);
+    sumCurrent += currentValue;
+    sumFinal += finalValue;
+    sumProfit += profit;
+    totalActualPaid += actualPaid;
+    maxFace = Math.max(maxFace, face);
+    return `<tr>
+      <td><input class="cell" data-t="huiSummary" data-i="${i}" data-f="name" value="${r.name||""}"></td>
+      <td class="num"><input class="cell money" data-t="huiSummary" data-i="${i}" data-f="faceValue" value="${r.faceValue||0}"></td>
+      <td class="num"><input class="cell money" data-t="huiSummary" data-i="${i}" data-f="monthlyPay" value="${r.monthlyPay||0}"></td>
+      <td class="center">
+        <div class="date-field">
+          <input class="date-text" data-t="huiSummary" data-i="${i}" data-f="startDate" placeholder="dd/mm/yyyy" value="${isoToDisplay(r.startDateISO||dateValueForInput(r.startDate||"", currentMonth, 1))}">
+          <button type="button" class="date-btn" data-open-date title="Chọn ngày bắt đầu">📅</button>
+          <input type="date" class="date-native" data-t="huiSummary" data-i="${i}" data-f="startDateISO" value="${r.startDateISO||dateValueForInput(r.startDate||"", currentMonth, 1)}">
+        </div>
+      </td>
+      <td class="center" style="background:#f8fafc"><b>${isoToDisplay(calcHuiEndISO(r))}</b><br><small>tự tính</small></td>
+      <td class="num"><input class="cell money" data-t="huiSummary" data-i="${i}" data-f="totalMonths" value="${r.totalMonths||0}"></td>
+      <td class="num" style="background:#f8fafc"><b>${paidMonths.toLocaleString("vi-VN",{maximumFractionDigits:0})}</b><br><small>tự tính</small></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(scheduleValue)}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(actualPaid)}</b></td>
+      <td class="num ${profit<0?'redtxt':'greentxt'}" style="background:#f8fafc"><b>${fmt(profit)}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${remainingPeriods.toLocaleString("vi-VN",{maximumFractionDigits:1})}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(currentValue)}</b></td>
+      <td class="num" style="background:#f8fafc"><b>${fmt(finalValue)}</b></td>
+      <td class="center"><input class="cell" data-t="huiSummary" data-i="${i}" data-f="payDay" value="${r.payDay||""}"></td>
+      <td><input class="cell" data-t="huiSummary" data-i="${i}" data-f="note" value="${r.note||""}"></td>
+      <td class="center"><button class="small-btn" data-delhuisummary="${i}">Xóa</button></td>
+    </tr>`;
+  }).join("");
+  const totalCurrent = sumCurrent - maxFace;
+  const totalFinal = sumFinal - maxFace;
+  const totalProfit = sumProfit;
+  document.getElementById("huiTotalCurrent").textContent=fmt(totalCurrent);
+  document.getElementById("huiTotalFinal").textContent=fmt(totalFinal);
+  document.getElementById("huiTotalProfit").textContent=fmt(totalProfit);
+
+  const fund=data.fund.reduce((s,r)=>s+parseNum(r.anh)+parseNum(r.duy),0);
+  const used=data.expenses.reduce((s,r)=>s+parseNum(r.amount),0);
+  document.getElementById("sFund").textContent=fmt(fund);
+  document.getElementById("sUsed").textContent=fmt(used);
+  document.getElementById("sLeft").textContent=fmt(fund-used);
+  document.getElementById("sHui").textContent=fmt((data.hui||[]).reduce((s,r)=>s+huiAmountDong(r.amount),0)/1000000);
+}
+
+function monthShortLabel(key){
+  const m=String(key||"").match(/^(\d{4})-(\d{2})$/);
+  if(!m) return key;
+  return "T"+Number(m[2])+"/"+String(m[1]).slice(2);
+}
+function getMonthlyHistory(){
+  data.monthlySpending ||= {};
+  data.deletedMonths ||= {};
+  const notDeleted=k=>!isDeletedMonth(k) || k===currentMonth;
+  const keys=new Set(Object.keys(data.monthlySpending).filter(k=>/^\d{4}-\d{2}$/.test(k) && notDeleted(k)));
+  Object.keys(data.monthly||{}).filter(k=>/^\d{4}-\d{2}$/.test(k) && notDeleted(k)).forEach(k=>keys.add(k));
+  keys.add(currentMonth);
+  return [...keys].sort().map(key=>{
+    const plan=data.monthlySpending[key]||{};
+    const items=Array.isArray(plan.items)?plan.items:[];
+    const baseSalary=parseDong(plan.salary);
+    const usableSalary=salaryUsableForMonth(key);
+    const extraIncome=extraIncomeForMonth(key);
+    const salary=usableSalary+extraIncome;
+    const budget=parseDong(plan.budget);
+    const ckSpent=items.reduce((sum,r)=>{
+      const m=String(r.method||"CK").toUpperCase();
+      return sum+((m!=="TM" && m!=="THE" && m!=="THẺ")?parseDong(r.amount):0);
+    },0);
+    const tmSpent=items.reduce((sum,r)=>sum+(String(r.method||"CK").toUpperCase()==="TM"?parseDong(r.amount):0),0);
+    const cardSpent=items.reduce((sum,r)=>{
+      const m=String(r.method||"").toUpperCase();
+      return sum+((m==="THE" || m==="THẺ")?parseDong(r.amount):0);
+    },0);
+    const spent=ckSpent+tmSpent+cardSpent;
+    const left=salary-spent;
+    const endDebt=monthEndDebtDong(key);
+    const showEndDebt=isMonthEndDebtVisible(key);
+    return {key,label:monthShortLabel(key),salary,baseSalary,usableSalary,extraIncome,budget,ckSpent,tmSpent,cardSpent,spent,left,endDebt,showEndDebt,count:items.length};
+  }).filter(r=>r.salary||r.baseSalary||r.budget||r.spent||r.endDebt||r.count||r.key===currentMonth);
+}
+function renderMonthlyHistory(){
+  const rows=getMonthlyHistory();
+  const chart=document.getElementById("salaryExpenseChart");
+  const tbody=document.querySelector("#salaryExpenseHistoryTable tbody");
+  const totalSalary=rows.reduce((s,r)=>s+r.salary,0);
+  const totalSpent=rows.reduce((s,r)=>s+r.spent,0);
+  const totalLeft=rows.reduce((s,r)=>s+r.left,0);
+  const setText=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
+  setText("histSalaryTotal",fmtDong(totalSalary));
+  setText("histSpentTotal",fmtDong(totalSpent));
+  setText("histLeftTotal",fmtDong(totalLeft));
+  setText("histMonthCount",String(rows.length));
+  if(tbody){
+    tbody.innerHTML=rows.map(r=>`<tr>
+      <td><b>${r.label}</b></td>
+      <td class="num"><input class="cell money history-money dong-money" data-t="monthlyHistory" data-month="${r.key}" data-f="salary" value="${fmtDongInput(r.baseSalary)}" inputmode="decimal"></td>
+      <td class="num greentxt"><b>${fmtDong(r.extraIncome)}</b></td>
+      <td class="num"><b>${fmtDong(r.salary)}</b></td>
+      <td class="num"><input class="cell money history-money dong-money" data-t="monthlyHistory" data-month="${r.key}" data-f="budget" value="${fmtDongInput(r.budget)}" inputmode="decimal"></td>
+      <td class="num redtxt"><b>${fmtDong(r.spent)}</b></td>
+      <td class="num"><b>${fmtDong(r.ckSpent)}</b></td>
+      <td class="num orangetxt"><b>${fmtDong(r.tmSpent)}</b></td>
+      <td class="num"><b>${fmtDong(r.cardSpent)}</b></td>
+      <td class="num ${r.left<0?'redtxt':'greentxt'}"><b>${fmtDong(r.left)}</b></td>
+      <td class="num">${r.showEndDebt?`<b>${fmtDong(r.endDebt)}</b>`:`—`}</td>
+      <td class="num">${r.count}</td>
+      <td class="center">${r.key===currentMonth?`<span class="badge blue">Đang quản lý</span>`:`<button type="button" class="small-btn danger" data-delmonth="${r.key}">Xóa tháng</button>`}</td>
+    </tr>`).join("");
+  }
+  if(chart){
+    const max=Math.max(1,...rows.map(r=>Math.max(r.salary,r.spent)));
+    if(rows.length===0 || max<=1){
+      chart.innerHTML=`<div class="history-empty" style="width:100%">Chưa có dữ liệu thu nhập/chi tiêu để vẽ biểu đồ.</div>`;
+    }else{
+      chart.innerHTML=rows.map(r=>{
+        const hSalary=Math.max(2,Math.round(r.salary/max*170));
+        const hSpent=Math.max(2,Math.round(r.spent/max*170));
+        const ckPct=r.spent>0 ? (r.ckSpent/r.spent*100) : 0;
+        const tmPct=r.spent>0 ? (r.tmSpent/r.spent*100) : 0;
+        const cardPct=r.spent>0 ? (r.cardSpent/r.spent*100) : 0;
+
+        return `<div class="chart-group">
+          <div class="chart-bars">
+            <div class="chart-bar salary" title="Tổng thu nhập dùng ${r.label}: ${fmtDong(r.salary)}" style="height:${hSalary}px"></div>
+            <div class="chart-stack" title="Chi tiêu ${r.label}: ${fmtDong(r.spent)} | CK: ${fmtDong(r.ckSpent)} | TM: ${fmtDong(r.tmSpent)} | Thẻ: ${fmtDong(r.cardSpent)}" style="height:${hSpent}px">
+              ${r.ckSpent>0?`<div class="chart-seg ck" style="height:${ckPct}%"></div>`:""}
+              ${r.tmSpent>0?`<div class="chart-seg tm" style="height:${tmPct}%"></div>`:""}
+              ${r.cardSpent>0?`<div class="chart-seg card" style="height:${cardPct}%"></div>`:""}
+            </div>
+          </div>
+          <div class="chart-label">${r.label}</div>
+        </div>`;
+      }).join("");
+    }
+  }
+}
+function renderMonthlySpending(){
+  const plan=getMonthlySpending();
+  plan.incomes ||= [];
+  const salary=incomeUsableForMonth(currentMonth);
+  const budget=parseDong(plan.budget);
+  plan.items.forEach(r=>{ if(!r.method) r.method="CK"; });
+  const spent=plan.items.reduce((s,r)=>s+parseDong(r.amount),0);
+  const left=budget-spent;
+  const salaryInput=document.getElementById("monthlySalaryInput");
+  const budgetInput=document.getElementById("monthlyBudgetInput");
+  if(salaryInput && document.activeElement!==salaryInput) salaryInput.value=fmtDongInput(plan.salary);
+  if(budgetInput && document.activeElement!==budgetInput) budgetInput.value=fmtDongInput(plan.budget);
+  const setText=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
+  setText("tab3CurrentMonthLabel", monthName(currentMonth));
+  setText("mSalary", fmtDong(salary));
+  setText("mSalaryHint", "Thu nhập dùng cho " + monthName(currentMonth));
+  setText("mBudget", fmtDong(budget));
+  setText("mSpent", fmtDong(spent));
+  setText("mLeft", fmtDong(left));
+  setText("mCount", String(plan.items.length));
+  const leftBox=document.getElementById("mLeft")?.closest(".kpi");
+  if(leftBox) leftBox.className="kpi "+(left<0?"red":"green");
+
+  const incomeExtraBox=document.querySelector(".income-extra-box");
+  if(incomeExtraBox) incomeExtraBox.classList.toggle("is-empty", plan.incomes.length===0);
+
+  const incomeBody=document.querySelector("#monthlyIncomeTable tbody");
+  if(incomeBody){
+    incomeBody.innerHTML=plan.incomes.map((r,i)=>`<tr>
+      <td class="center">
+        <div class="date-field">
+          <input class="date-text" data-t="monthlyIncome" data-i="${i}" data-f="date" placeholder="dd/mm/yyyy" value="${isoToDisplay(r.dateISO||dateValueForInput(r.date||"", currentMonth, 1))}">
+          <button type="button" class="date-btn" data-open-date title="Chọn ngày nhận">📅</button>
+          <input type="date" class="date-native" data-t="monthlyIncome" data-i="${i}" data-f="dateISO" value="${r.dateISO||dateValueForInput(r.date||"", currentMonth, 1)}">
+        </div>
+      </td>
+      <td><input class="cell" data-t="monthlyIncome" data-i="${i}" data-f="name" value="${esc(r.name||"")}" placeholder="Thưởng, phụ thu..."></td>
+      <td class="num"><input class="cell money dong-money" data-t="monthlyIncome" data-i="${i}" data-f="amount" value="${fmtDongInput(r.amount)}" inputmode="decimal"></td>
+      <td><input class="cell" data-t="monthlyIncome" data-i="${i}" data-f="note" value="${esc(r.note||"")}"></td>
+      <td class="center"><button class="small-btn" data-delmonthlyincome="${i}">Xóa</button></td>
+    </tr>`).join("");
+  }
+
+  const tbody=document.querySelector("#monthlyExpenseTable tbody");
+  if(tbody){
+    tbody.innerHTML=plan.items.map((r,i)=>`<tr>
+      <td class="center">
+        <div class="date-field">
+          <input class="date-text" data-t="monthlyExpense" data-i="${i}" data-f="date" placeholder="dd/mm/yyyy" value="${isoToDisplay(r.dateISO||dateValueForInput(r.date||"", currentMonth, 1))}">
+          <button type="button" class="date-btn" data-open-date title="Chọn ngày chi">📅</button>
+          <input type="date" class="date-native" data-t="monthlyExpense" data-i="${i}" data-f="dateISO" value="${r.dateISO||dateValueForInput(r.date||"", currentMonth, 1)}">
+        </div>
+      </td>
+      <td><input class="cell" data-t="monthlyExpense" data-i="${i}" data-f="name" value="${r.name||""}"></td>
+      <td class="num"><input class="cell money dong-money" data-t="monthlyExpense" data-i="${i}" data-f="amount" value="${fmtDongInput(r.amount)}" inputmode="decimal"></td>
+      <td class="center"><select class="cell method-select" data-t="monthlyExpense" data-i="${i}" data-f="method">${[{v:"CK",t:"CK"},{v:"TM",t:"TM"},{v:"THE",t:"Thẻ"}].map(o=>`<option value="${o.v}" ${String(r.method||"CK").toUpperCase()===o.v || (o.v==="THE" && String(r.method||"").toUpperCase()==="THẺ")?"selected":""}>${o.t}</option>`).join("")}</select></td>
+      <td><input class="cell" data-t="monthlyExpense" data-i="${i}" data-f="note" value="${r.note||""}"></td>
+      <td class="center"><button class="small-btn" data-delmonthlyexpense="${i}">Xóa</button></td>
+    </tr>`).join("");
+  }
+  renderMonthlyHistory();
+}
+
+function bind(){
+  document.querySelectorAll(".tab3-sub").forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll(".tab3-sub").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".tab3-sub-panel").forEach(x=>x.style.display="none");
+      btn.classList.add("active");
+      const panel=document.getElementById(btn.dataset.tab3Panel);
+      if(panel) panel.style.display="block";
+      renderMonthlyHistory();
+    };
+  });
+  document.querySelectorAll("[data-open-date]").forEach(btn=>{
+    btn.onclick=()=>{
+      const native=btn.parentElement.querySelector(".date-native");
+      if(!native) return;
+      if(native.showPicker) native.showPicker();
+      else native.click();
+    };
+  });
+  document.querySelectorAll('.dong-money').forEach(el=>{
+    el.oninput=()=>{
+      const n=formatDongInput(el);
+      const t=el.dataset.t, f=el.dataset.f;
+      if(t==="monthlyExpense" && f==="amount"){
+        const idx=Number(el.dataset.i);
+        const plan=getMonthlySpending();
+        if(plan.items[idx]) plan.items[idx].amount=n;
+        refreshMonthlySpendingKpis();
+      }
+      if(t==="monthlyIncome" && f==="amount"){
+        const idx=Number(el.dataset.i);
+        const plan=getMonthlySpending();
+        plan.incomes ||= [];
+        if(plan.incomes[idx]) plan.incomes[idx].amount=n;
+        refreshMonthlySpendingKpis();
+      }
+      if(t==="monthlyHistory" && (f==="salary" || f==="budget")){
+        const key=el.dataset.month;
+        data.monthlySpending ||= {};
+        data.monthlySpending[key] ||= {budget:0,salary:0,incomes:[],items:[]};
+        data.monthlySpending[key].incomes ||= [];
+        data.monthlySpending[key][f]=n;
+      }
+    };
+  });
+  document.querySelectorAll("[data-t]").forEach(el=>{
+    el.onchange=function(){
+      recordHistory();
+      const t=this.dataset.t, f=this.dataset.f;
+      const moneyFields=["limit","debt","payAmount","paidAmount","plannedUse","amount","anh","duy","credit","termMonths","annualRate","paidPrincipal","monthly","closeDay","dueDay","faceValue","monthlyPay","paidMonths","currentValue","finalValue","need","received","gross","feeRate","feeAmount"];
+      let val=moneyFields.includes(f)?parseNum(this.value):this.value;
+      if(t==="card") data.cards[Number(this.dataset.i)][f]=val;
+      if(t==="monthCard"){
+        const cardName=this.dataset.card;
+        const row=getMonth().cards[cardName];
+        if(f==="paidAmount"){
+          const oldPaid=parseNum(row.paidAmount);
+          const newPaid=parseNum(val);
+          const delta=newPaid-oldPaid;
+          row.paidAmount=newPaid;
+          if(delta!==0){
+            row.debt=Math.max(0, parseNum(row.debt)-delta);
+            row.payAmount=Math.max(0, parseNum(row.payAmount)-delta);
+          }
+          updateCardPaidStatus(row);
+        }else{
+          row[f]=val;
+          if(f==="payDateISO") row.payDate=isoToDisplay(val);
+          if(f==="payDate"){
+            const cardObj=data.cards.find(c=>c.name===cardName) || {};
+            row.payDateISO=dateValueForInput(val,currentMonth,cardObj.dueDay||1);
+          }
+          if(f==="payAmount") updateCardPaidStatus(row);
+        }
+      }
+      if(t==="payrow") getMonth().cardPayments[Number(this.dataset.i)][f]=val;
+      if(t==="cardActual"){
+        const idx=Number(this.dataset.i);
+        const row=getCardActualLogs()[idx];
+        if(row){
+          row[f]=val;
+          if(f==="dateISO") row.date=isoToDisplay(val);
+          if(f==="date") row.dateISO=dateValueForInput(val,currentMonth,1);
+        }
+      }
+      if(t==="loan"){
+        const idx=Number(this.dataset.i);
+        data.loans[idx][f]=val;
+        if(f==="startDateISO") data.loans[idx].startDate=isoToDisplay(val);
+        if(f==="startDate") data.loans[idx].startDateISO=dateValueForInput(val,currentMonth,1);
+        if(f==="payDateISO") data.loans[idx].payDate=isoToDisplay(val);
+        if(f==="payDate") data.loans[idx].payDateISO=dateValueForInput(val,currentMonth,1);
+      }
+      if(t==="freeNotes") data.freeNotes[Number(this.dataset.i)][f]=val;
+      if(t==="monthlyExpense"){
+        const idx=Number(this.dataset.i);
+        const plan=getMonthlySpending();
+        plan.items[idx][f]=(f==="amount"?parseDong(this.value):(f==="method"?String(val||"CK").toUpperCase():val));
+        if(f==="dateISO") plan.items[idx].date=isoToDisplay(val);
+        if(f==="date") plan.items[idx].dateISO=dateValueForInput(val,currentMonth,1);
+      }
+      if(t==="monthlyIncome"){
+        const idx=Number(this.dataset.i);
+        const plan=getMonthlySpending();
+        plan.incomes ||= [];
+        if(plan.incomes[idx]){
+          plan.incomes[idx][f]=(f==="amount"?parseDong(this.value):val);
+          if(f==="dateISO") plan.incomes[idx].date=isoToDisplay(val);
+          if(f==="date") plan.incomes[idx].dateISO=dateValueForInput(val,currentMonth,1);
+        }
+      }
+      if(t==="fund") data.fund[Number(this.dataset.i)][f]=val;
+      if(t==="expense") data.expenses[Number(this.dataset.i)][f]=val;
+      if(t==="hui"){
+        if(f==="amount") val=parseDong(this.value);
+        data.hui[Number(this.dataset.i)][f]=val;
+      }
+      if(t==="huiSummary"){
+        const idx=Number(this.dataset.i);
+        data.huiSummary[idx][f]=val;
+        if(f==="startDateISO") data.huiSummary[idx].startDate=isoToDisplay(val);
+        if(f==="startDate") data.huiSummary[idx].startDateISO=dateValueForInput(val,currentMonth,1);
+      }
+      if(t==="monthlyHistory"){
+        const key=this.dataset.month;
+        data.monthlySpending ||= {};
+        data.monthlySpending[key] ||= {budget:0,salary:0,incomes:[],items:[]};
+        data.monthlySpending[key].incomes ||= [];
+        data.monthlySpending[key][f]=parseDong(this.value);
+      }
+      save(true); renderAll();
+    };
+  });
+  document.querySelectorAll("[data-delpay]").forEach(b=>b.onclick=()=>{recordHistory();getMonth().cardPayments.splice(Number(b.dataset.delpay),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delloan]").forEach(b=>b.onclick=()=>{
+    recordHistory();
+    const idx=Number(b.dataset.delloan);
+    const loan=data.loans[idx];
+    if(confirm("Xóa khoản vay này?")){
+      data.loans.splice(idx,1);
+      save(true); renderAll();
+    }
+  });
+  document.querySelectorAll("[data-delfund]").forEach(b=>b.onclick=()=>{recordHistory();data.fund.splice(Number(b.dataset.delfund),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delexp]").forEach(b=>b.onclick=()=>{recordHistory();data.expenses.splice(Number(b.dataset.delexp),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delmonthlyexpense]").forEach(b=>b.onclick=()=>{recordHistory();getMonthlySpending().items.splice(Number(b.dataset.delmonthlyexpense),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delmonthlyincome]").forEach(b=>b.onclick=()=>{recordHistory();getMonthlySpending().incomes.splice(Number(b.dataset.delmonthlyincome),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delmonth]").forEach(b=>b.onclick=(ev)=>{
+    ev.preventDefault();
+    ev.stopPropagation();
+    deleteManagedMonth(b.dataset.delmonth,b);
+  });
+  document.querySelectorAll("[data-add-card-fee-temp]").forEach(b=>b.onclick=()=>{
+    const feeInfo={
+      fee:parseFloat(b.dataset.fee||"0")||0,
+      netNeed:parseFloat(b.dataset.net||"0")||0,
+      grossNeed:parseFloat(b.dataset.gross||"0")||0,
+      rate:CARD_WITHDRAW_FEE_RATE
+    };
+    recordHistory();
+    upsertCardFeeExpense(feeInfo,"temp");
+    save(true);
+    renderAll();
+  });
+  document.querySelectorAll("[data-add-card-actual]").forEach(b=>b.onclick=()=>{
+    const cardName=b.dataset.addCardActual;
+    const payRows=data.cards
+      .map(c=>({c, m:cardMonthly(c)}))
+      .filter(x=>parseNum(x.m.payAmount)>0 || String(x.m.status||"")!=="Chưa xử lý")
+      .sort(compareCardDueNearest);
+    const rows=payRows.length ? payRows : data.cards
+      .map(c=>({c,m:cardMonthly(c)}))
+      .sort(compareCardDueNearest);
+    const plan=buildAutoPaymentPlan(rows);
+    recordHistory();
+    addActualFromPlan(cardName, plan[cardName]);
+    save(true);
+    renderAll();
+  });
+  document.querySelectorAll("[data-post-actual-fee]").forEach(b=>b.onclick=()=>{
+    const row=getCardActualLogs()[Number(b.dataset.postActualFee)];
+    if(!row) return;
+    recordHistory();
+    upsertActualFeeExpense(row);
+    save(true);
+    renderAll();
+  });
+  document.querySelectorAll("[data-del-card-actual]").forEach(b=>b.onclick=()=>{
+    const idx=Number(b.dataset.delCardActual);
+    const logs=getCardActualLogs();
+    const row=logs[idx];
+    if(row && confirm("Xóa giao dịch rút thẻ này?")){
+      recordHistory();
+      removeActualFeeExpense(row);
+      logs.splice(idx,1);
+      save(true);
+      renderAll();
+    }
+  });
+  document.querySelectorAll("[data-delhui]").forEach(b=>b.onclick=()=>{recordHistory();data.hui.splice(Number(b.dataset.delhui),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delfreenote]").forEach(b=>b.onclick=()=>{recordHistory();data.freeNotes.splice(Number(b.dataset.delfreenote),1);save(true);renderAll();});
+  document.querySelectorAll("[data-delhuisummary]").forEach(b=>b.onclick=()=>{recordHistory();data.huiSummary.splice(Number(b.dataset.delhuisummary),1);save(true);renderAll();});
+}
+function renderAll(){
+  renderMonthSelect(); getMonth(); renderCards(); renderLoans(); renderSavings(); renderMonthlySpending(); bind(); updateUndoRedoButtons();
+}
+
+document.querySelectorAll(".tab-btn").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); document.getElementById(b.dataset.tab).classList.add("active");
+});
+const monthSelectEl=document.getElementById("monthSelect");
+if(monthSelectEl) monthSelectEl.onchange=e=>switchMonth(e.target.value,true);
+const prevMonthBtn=document.getElementById("prevMonth");
+if(prevMonthBtn) prevMonthBtn.onclick=()=>switchMonth(addMonth(currentMonth,-1),true);
+const nextMonthBtn=document.getElementById("nextMonth");
+if(nextMonthBtn) nextMonthBtn.onclick=()=>switchMonth(addMonth(currentMonth,1),true);
+const newMonthBtn=document.getElementById("newMonth");
+if(newMonthBtn) newMonthBtn.onclick=createNextMonth;
+
+const saveBtn=document.getElementById("save");
+if(saveBtn) saveBtn.onclick=()=>save(false);
+const resetBtn=document.getElementById("reset");
+if(resetBtn) resetBtn.onclick=()=>{if(confirm("Khôi phục dữ liệu mặc định?")){recordHistory(); localStorage.removeItem(STORE_KEY);data=deep(DEFAULT);currentMonth=nowMonth();renderAll();}}
+function nextFundLabel(){
+  const rows=Array.isArray(data.fund)?data.fund:[];
+  for(let i=rows.length-1;i>=0;i--){
+    const label=String(rows[i]?.label||"").trim();
+    const m=label.match(/^T\s*(\d{1,2})$/i) || label.match(/^Tháng\s*(\d{1,2})$/i);
+    if(m){
+      const n=Number(m[1]);
+      if(n>=1 && n<=12) return "T" + (n>=12 ? 1 : n+1);
+    }
+  }
+  const m=Number(String(currentMonth||nowMonth()).split("-")[1]) || 1;
+  return "T" + m;
+}
+
+const addCardPayBtn=document.getElementById("addCardPay");
+if(addCardPayBtn) addCardPayBtn.onclick=()=>{recordHistory();getMonth().cardPayments.push({date:"",card:"",amount:0,note:""});save(true);renderAll();}
+const addLoanBtn=document.getElementById("addLoan");
+if(addLoanBtn) addLoanBtn.onclick=()=>{
+  recordHistory();
+  data.loans.push({
+    name:"Khoản vay mới",
+    borrower:"",
+    credit:0,
+    debt:0,
+    startDate:"",
+    startDateISO:"",
+    termMonths:0,
+    payDate:"",
+    payDateISO:"",
+    annualRate:0,
+    paidPrincipal:0,
+    monthly:0,
+    note:""
+  });
+  save(true); renderAll();
+}
+document.getElementById("addFund").onclick=()=>{recordHistory();data.fund.push({label:nextFundLabel(),anh:0,duy:0,note:""});save(true);renderAll();}
+document.getElementById("addExpense").onclick=()=>{recordHistory();data.expenses.push({name:"",amount:0,note:""});save(true);renderAll();}
+const monthlySalaryInput=document.getElementById("monthlySalaryInput");
+if(monthlySalaryInput){
+  monthlySalaryInput.oninput=()=>{
+    const n=formatDongInput(monthlySalaryInput);
+    getMonthlySpending().salary=n;
+    refreshMonthlySpendingKpis();
+  };
+  monthlySalaryInput.onchange=()=>{
+    recordHistory();
+    getMonthlySpending().salary=parseDong(monthlySalaryInput.value);
+    save(true); renderAll();
+  };
+}
+const monthlyBudgetInput=document.getElementById("monthlyBudgetInput");
+if(monthlyBudgetInput){
+  monthlyBudgetInput.oninput=()=>{
+    const n=formatDongInput(monthlyBudgetInput);
+    getMonthlySpending().budget=n;
+    refreshMonthlySpendingKpis();
+  };
+  monthlyBudgetInput.onchange=()=>{recordHistory();getMonthlySpending().budget=parseDong(monthlyBudgetInput.value);save(true);renderAll();};
+}
+const addMonthlyIncomeBtn=document.getElementById("addMonthlyIncome");
+if(addMonthlyIncomeBtn) addMonthlyIncomeBtn.onclick=()=>{recordHistory();const plan=getMonthlySpending();plan.incomes ||= [];plan.incomes.push({date:"",dateISO:dateValueForInput("",currentMonth,new Date().getDate()),name:"",amount:0,note:""});save(true);renderAll();}
+const addMonthlyExpenseBtn=document.getElementById("addMonthlyExpense");
+if(addMonthlyExpenseBtn) addMonthlyExpenseBtn.onclick=()=>{recordHistory();getMonthlySpending().items.push({date:"",dateISO:dueISOForMonth(currentMonth, new Date().getDate()),name:"",amount:0,method:"CK",note:""});save(true);renderAll();}
+const addFreeNoteBtn=document.getElementById("addFreeNote");
+if(addFreeNoteBtn) addFreeNoteBtn.onclick=()=>{recordHistory();data.freeNotes.push({text:""});save(true);renderAll();}
+const addHuiOld=document.getElementById("addHui");
+if(addHuiOld) addHuiOld.onclick=()=>{recordHistory();data.hui ||= [];data.hui.push({date:"",amount:1200000,note:""});save(true);renderAll();}
+const addHuiSummaryBtn=document.getElementById("addHuiSummary");
+if(addHuiSummaryBtn) addHuiSummaryBtn.onclick=()=>{recordHistory();data.huiSummary.push({name:"Hụi mới", faceValue:3, monthlyPay:2.4, startDate:"", startDateISO:"", endDate:"", endDateISO:"", totalMonths:0, paidMonths:0, currentRound:"", currentValue:0, finalValue:0, payDay:"20 âm lịch", note:""});save(true);renderAll();}
+
+
+function xmlEscape(v){
+  return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function sheetNameSafe(name, used){
+  let base=String(name||"Sheet").replace(/[\\\/?*\[\]:]/g," ").trim().slice(0,31) || "Sheet";
+  let out=base, i=2;
+  used ||= new Set();
+  while(used.has(out)){
+    const suffix=" "+i++;
+    out=base.slice(0,31-suffix.length)+suffix;
+  }
+  used.add(out);
+  return out;
+}
+function excelNumberCell(v){
+  const n=(typeof v==="number")?v:parseNum(v);
+  if(!isFinite(n)) return `<Cell><Data ss:Type="String"></Data></Cell>`;
+  return `<Cell><Data ss:Type="Number">${n}</Data></Cell>`;
+}
+function excelDongCell(v){
+  const n=(typeof v==="number")?v:parseDong(v);
+  if(!isFinite(n)) return `<Cell><Data ss:Type="String"></Data></Cell>`;
+  return `<Cell><Data ss:Type="Number">${n}</Data></Cell>`;
+}
+function excelTextCell(v){
+  return `<Cell><Data ss:Type="String">${xmlEscape(v)}</Data></Cell>`;
+}
+function excelRow(cells, style){
+  return `<Row>${cells.map(c=>{
+    const st=style?` ss:StyleID="${style}"`:"";
+    if(c && c.__type==="number") return `<Cell${st}><Data ss:Type="Number">${isFinite(c.value)?c.value:0}</Data></Cell>`;
+    if(c && c.__type==="dong") return `<Cell${st}><Data ss:Type="Number">${isFinite(c.value)?c.value:0}</Data></Cell>`;
+    return `<Cell${st}><Data ss:Type="String">${xmlEscape(c && c.__text!==undefined ? c.__text : c)}</Data></Cell>`;
+  }).join("")}</Row>`;
+}
+function excelMoneyText(v){
+  const n=(typeof v==="number")?v:parseDong(v);
+  return (isFinite(n)?Math.round(n):0).toLocaleString("vi-VN");
+}
+function excelTrdMoneyText(v){
+  const n=parseNum(v);
+  return (isFinite(n)?Math.round(n*1000000):0).toLocaleString("vi-VN");
+}
+function cellNum(v){ return {__type:"number", value:(typeof v==="number"?v:parseNum(v))}; }
+function cellDong(v){ return {__text:excelMoneyText(v)}; }
+function cellTrdDong(v){ return {__text:excelTrdMoneyText(v)}; }
+function cellPercent(v){ return {__text:(parseNum(v).toLocaleString("vi-VN",{maximumFractionDigits:2})+"%")}; }
+function cellText(v){ return {__text:v}; }
+function worksheetXml(name, headers, rows, usedNames){
+  const safeName=sheetNameSafe(name, usedNames);
+  const head=excelRow(headers.map(cellText), "Header");
+  const body=(rows||[]).map(r=>excelRow(r)).join("\n");
+  const colCount=Math.max(headers.length, ...(rows||[]).map(r=>r.length), 1);
+  const cols=Array.from({length:colCount},()=>'<Column ss:AutoFitWidth="1" ss:Width="120"/>').join("");
+  return `<Worksheet ss:Name="${xmlEscape(safeName)}"><Table>${cols}${head}\n${body}</Table></Worksheet>`;
+}
+function allManagedMonths(){
+  const months=new Set([currentMonth]);
+  Object.keys(data.monthly||{}).forEach(k=>{ if(/^\d{4}-\d{2}$/.test(k) && (!isDeletedMonth(k) || k===currentMonth)) months.add(k); });
+  Object.keys(data.monthlySpending||{}).forEach(k=>{ if(/^\d{4}-\d{2}$/.test(k) && (!isDeletedMonth(k) || k===currentMonth)) months.add(k); });
+  return [...months].sort();
+}
+function methodExportLabel(method){
+  const m=String(method||"CK").toUpperCase();
+  if(m==="TM") return "TM";
+  if(m==="THE" || m==="THẺ") return "Thẻ";
+  return "CK";
+}
+function cardMonthRow(card, monthKey){
+  const mm=data.monthly && data.monthly[monthKey] ? data.monthly[monthKey] : {};
+  const row=mm.cards && mm.cards[card.name] ? mm.cards[card.name] : {};
+  const limit=parseNum(card.limit);
+  const debt=parseNum(row.debt);
+  const avail=Math.max(0, limit-debt);
+  const util=limit?debt/limit*100:0;
+  return [
+    monthName(monthKey), card.name, cellNum(card.closeDay), cellNum(card.dueDay), cellNum(card.grace),
+    cellNum(limit), cellNum(debt), cellNum(avail), cellNum(util), cellNum(row.payAmount||0), cellNum(row.paidAmount||0),
+    isoToDisplay(row.payDateISO||row.payDate||""), cellNum(row.plannedUse||0), row.status||"", row.paymentSource||"", row.note||""
+  ];
+}
+function excelStyledRow(cells, style){ return {__cells:cells, __style:style}; }
+function excelSection(title){ return excelStyledRow([title], "Section"); }
+function excelHeader(headers){ return excelStyledRow(headers.map(cellText), "Header"); }
+function excelBlank(){ return [""]; }
+function excelEmptyRow(message){ return [message || "Không có dữ liệu"]; }
+function excelCellWidthText(c){
+  if(c && c.__text!==undefined) return String(c.__text||"");
+  if(c && c.__type==="dong") return fmtDong(c.value||0);
+  if(c && c.__type==="number") return String(Math.round((c.value||0)*100)/100);
+  return String(c ?? "");
+}
+function worksheetXmlSingle(name, rows, usedNames){
+  const safeName=sheetNameSafe(name, usedNames);
+  const plainRows=(rows||[]).map(r=>({cells:(r && r.__cells) ? r.__cells : r, style:r && r.__style}));
+  const body=plainRows.map(r=>excelRow(r.cells, r.style)).join("\n");
+  const colCount=Math.max(...plainRows.map(r=>(r.cells||[]).length), 8);
+  const widths=[];
+  const maxByCol=[115,150,115,115,105,115,115,120,120,135,135,135,135,135,135];
+  for(let i=0;i<colCount;i++){
+    let maxLen=8;
+    plainRows.forEach(r=>{
+      if(r.style==="Section") return;
+      const txt=excelCellWidthText((r.cells||[])[i]);
+      maxLen=Math.max(maxLen, Math.min(String(txt).length, 22));
+    });
+    const w=Math.max(58, Math.min(maxByCol[i]||130, 34 + maxLen*5.1));
+    widths.push(Math.round(w));
+  }
+  const cols=Array.from({length:colCount},(_,i)=>`<Column ss:AutoFitWidth="1" ss:Width="${widths[i]}"/>`).join("");
+  return `<Worksheet ss:Name="${xmlEscape(safeName)}"><Table>${cols}${body}</Table></Worksheet>`;
+}
+function addExcelBlock(rows, title, headers, bodyRows){
+  rows.push(excelSection(title));
+  if(headers && headers.length) rows.push(excelHeader(headers));
+  if(bodyRows && bodyRows.length){
+    bodyRows.forEach(r=>rows.push(r));
+  }else{
+    rows.push(excelEmptyRow());
+  }
+  rows.push(excelBlank());
+}
+function buildCurrentMonthExcelSheet(){
+  const m=currentMonth;
+  const mm=data.monthly && data.monthly[m] ? data.monthly[m] : {};
+  const plan=data.monthlySpending && data.monthlySpending[m] ? data.monthlySpending[m] : {};
+  const history=getMonthlyHistory().find(r=>r.key===m) || {label:monthShortLabel(m),salary:0,baseSalary:0,usableSalary:0,extraIncome:0,budget:0,ckSpent:0,tmSpent:0,cardSpent:0,spent:0,left:0,endDebt:0,showEndDebt:false,count:0};
+  const rows=[];
+
+  const sumBy=(arr, fn)=>(arr||[]).reduce((s,x)=>s+parseNum(fn(x)),0);
+  const sumDongBy=(arr, fn)=>(arr||[]).reduce((s,x)=>s+(Number(fn(x))||0),0);
+
+  rows.push(excelSection("BÁO CÁO THÁNG ĐANG XEM"));
+  rows.push(["Tháng", monthName(m)]);
+  rows.push(["Ngày xuất", new Date().toLocaleString("vi-VN")]);
+  rows.push(excelBlank());
+
+  const cardRows=(data.cards||[]).map(c=>{
+    const row=mm.cards && mm.cards[c.name] ? mm.cards[c.name] : {};
+    const limit=parseNum(c.limit);
+    const debt=parseNum(row.debt);
+    const avail=Math.max(0,limit-debt);
+    const util=limit?debt/limit*100:0;
+    return [c.name||"", cellTrdDong(limit), cellTrdDong(debt), cellTrdDong(avail), cellPercent(util), cellTrdDong(row.payAmount||0), cellTrdDong(row.paidAmount||0), isoToDisplay(row.payDateISO||row.payDate||""), cellTrdDong(row.plannedUse||0), row.status||"", row.note||""];
+  });
+  if(cardRows.length){
+    const totalLimit=sumBy(data.cards,c=>c.limit);
+    const totalDebt=sumBy(data.cards,c=>parseNum((mm.cards&&mm.cards[c.name]&&mm.cards[c.name].debt)||0));
+    const totalAvail=sumBy(data.cards,c=>Math.max(0,parseNum(c.limit)-parseNum((mm.cards&&mm.cards[c.name]&&mm.cards[c.name].debt)||0)));
+    const totalPay=sumBy(data.cards,c=>(mm.cards&&mm.cards[c.name]&&mm.cards[c.name].payAmount)||0);
+    const totalPaid=sumBy(data.cards,c=>(mm.cards&&mm.cards[c.name]&&mm.cards[c.name].paidAmount)||0);
+    const totalPlanned=sumBy(data.cards,c=>(mm.cards&&mm.cards[c.name]&&mm.cards[c.name].plannedUse)||0);
+    cardRows.push(excelStyledRow(["TỔNG CỘNG", cellTrdDong(totalLimit), cellTrdDong(totalDebt), cellTrdDong(totalAvail), cellPercent(totalLimit?totalDebt/totalLimit*100:0), cellTrdDong(totalPay), cellTrdDong(totalPaid), "", cellTrdDong(totalPlanned), "", ""], "Total"));
+  }
+  addExcelBlock(rows,"1. DƯ NỢ THẺ",["Thẻ","Hạn mức","Dư nợ","HM còn lại","Tỷ lệ dùng","Số tiền TT còn lại","Đã thanh toán","Ngày TT","Ngày rút","Trạng thái","Ghi chú"], cardRows);
+
+  const planRowsBase=(data.cards||[])
+    .map(c=>({c, m:cardMonthly(c)}))
+    .filter(x=>parseNum(x.m.payAmount)>0 || parseNum(x.m.paidAmount)>0 || String(x.m.status||"")!=="Chưa xử lý")
+    .sort(compareCardDueNearest);
+  const autoPaymentPlan=buildAutoPaymentPlan(planRowsBase.length ? planRowsBase : (data.cards||[]).map(c=>({c,m:cardMonthly(c)})).sort(compareCardDueNearest));
+  const planRows=planRowsBase.map(({c,m})=>[
+    isoToDisplay(m.payDateISO||m.payDate||dueDateForMonth(currentMonth,c.dueDay)),
+    c.name||"",
+    cellTrdDong(m.payAmount||0),
+    cellTrdDong(m.paidAmount||0),
+    m.status||"Chưa xử lý",
+    autoSourceShort(autoPaymentPlan[c.name])
+  ]);
+  if(planRows.length){
+    planRows.push(excelStyledRow(["TỔNG CỘNG", "", cellTrdDong(sumBy(planRowsBase,x=>x.m.payAmount||0)), cellTrdDong(sumBy(planRowsBase,x=>x.m.paidAmount||0)), "", ""], "Total"));
+  }
+  addExcelBlock(rows,"2. KẾ HOẠCH THANH TOÁN THẺ",["Ngày TT","Thẻ","Còn phải TT","Đã thanh toán","Trạng thái","Nguồn đề xuất"], planRows);
+
+  const actualRows=(mm.cardActuals||[]).map(r=>[isoToDisplay(r.dateISO||r.date||""), r.source||"", r.payCard||"", cellTrdDong(actualWithdraw(r)), cellPercent(actualFeeRate(r)*100), cellTrdDong(actualReceived(r)), cellTrdDong(actualFee(r)), r.postedExpense?"Đã ghi":"Chưa ghi"]);
+  if(actualRows.length){
+    actualRows.push(excelStyledRow(["TỔNG CỘNG", "", "", cellTrdDong(sumBy(mm.cardActuals,r=>actualWithdraw(r))), "", cellTrdDong(sumBy(mm.cardActuals,r=>actualReceived(r))), cellTrdDong(sumBy(mm.cardActuals,r=>actualFee(r))), ""], "Total"));
+  }
+  addExcelBlock(rows,"3. SỐ TIỀN RÚT ĐÁO",["Ngày","Nguồn rút/quẹt","Thẻ trả","Số tiền rút","Phí %","Thực nhận","Phí","Hạch toán"], actualRows);
+
+  const loanRows=(data.loans||[]).map(l=>[l.name||"", l.borrower||"", cellTrdDong(l.credit||0), cellTrdDong(l.debt||0), isoToDisplay(l.startDateISO||l.startDate||""), cellNum(l.termMonths||0), isoToDisplay(loanDueISO(l)), cellPercent(l.annualRate||0), cellTrdDong(l.paidPrincipal||0), cellTrdDong(loanMonthlyInterest(l)), cellTrdDong(loanTotalPaid(l)), cellTrdDong(l.monthly||0)]);
+  if(loanRows.length){
+    loanRows.push(excelStyledRow(["TỔNG CỘNG", "", cellTrdDong(sumBy(data.loans,l=>l.credit||0)), cellTrdDong(sumBy(data.loans,l=>l.debt||0)), "", "", "", "", cellTrdDong(sumBy(data.loans,l=>l.paidPrincipal||0)), cellTrdDong(sumBy(data.loans,l=>loanMonthlyInterest(l))), cellTrdDong(sumBy(data.loans,l=>loanTotalPaid(l))), cellTrdDong(sumBy(data.loans,l=>l.monthly||0))], "Total"));
+  }
+  addExcelBlock(rows,"4. THÔNG TIN KHOẢN VAY",["Khoản vay","Người vay","Số tiền vay","Dư nợ","Ngày vay","Thời hạn","Ngày đến hạn","LS năm","Đã TT gốc","Lãi/tháng","Tổng đã TT","Trả tháng"], loanRows);
+
+  const huiRows=(data.huiSummary||[]).map(r=>[r.name||"", cellTrdDong(r.faceValue||0), cellTrdDong(r.monthlyPay||0), isoToDisplay(r.startDateISO||r.startDate||""), cellNum(r.totalMonths||0), cellNum(r.paidMonths||0), r.currentRound||"", cellTrdDong(r.currentValue||0), cellTrdDong(r.finalValue||0), r.payDay||"", r.note||""]);
+  if(huiRows.length){
+    huiRows.push(excelStyledRow(["TỔNG CỘNG", cellTrdDong(sumBy(data.huiSummary,r=>r.faceValue||0)), cellTrdDong(sumBy(data.huiSummary,r=>r.monthlyPay||0)), "", "", "", "", cellTrdDong(sumBy(data.huiSummary,r=>r.currentValue||0)), cellTrdDong(sumBy(data.huiSummary,r=>r.finalValue||0)), "", ""], "Total"));
+  }
+  addExcelBlock(rows,"5. HỤI",["Tên hụi","Mệnh hụi","Đóng/tháng","Ngày bắt đầu","Tổng tháng","Đã đóng","Kỳ hiện tại","Giá trị hiện tại","Giá trị cuối","Ngày đóng","Ghi chú"], huiRows);
+
+  const huiDetailRows=(data.hui||[]).map(r=>[r.date||"", cellDong(huiAmountDong(r.amount||0)), r.note||""]);
+  if(huiDetailRows.length){
+    huiDetailRows.push(excelStyledRow(["TỔNG CỘNG", cellDong(sumDongBy(data.hui,r=>huiAmountDong(r.amount||0))), ""], "Total"));
+  }
+  addExcelBlock(rows,"5A. CHI TIẾT HỤI",["Ngày","Số tiền","Ghi chú"], huiDetailRows);
+
+  const fundRows=(data.fund||[]).map(r=>[r.date||"", cellTrdDong(r.anh||0), cellTrdDong(r.duy||0), r.note||""]);
+  if(fundRows.length){
+    fundRows.push(excelStyledRow(["TỔNG CỘNG", cellTrdDong(sumBy(data.fund,r=>r.anh||0)), cellTrdDong(sumBy(data.fund,r=>r.duy||0)), ""], "Total"));
+  }
+  addExcelBlock(rows,"6. QUỸ CHUNG",["Ngày","Anh","Duy","Ghi chú"], fundRows);
+
+  const expenseRows=(data.expenses||[]).map(r=>[r.name||"", cellTrdDong(r.amount||0), r.note||""]);
+  if(expenseRows.length){
+    expenseRows.push(excelStyledRow(["TỔNG CỘNG", cellTrdDong(sumBy(data.expenses,r=>r.amount||0)), ""], "Total"));
+  }
+  addExcelBlock(rows,"7. CHI TIẾT SỬ DỤNG QUỸ",["Nội dung","Số tiền","Ghi chú"], expenseRows);
+
+  const incomeRows=[
+    ["Thu nhập tháng trước", cellDong(history.usableSalary), ""],
+    ["Thu nhập thêm", cellDong(history.extraIncome), ""],
+    excelStyledRow(["TỔNG THU NHẬP", cellDong(history.salary), ""], "Total"),
+    ["Định mức chi tiêu", cellDong(history.budget), ""],
+    ["Đã dùng", cellDong(history.spent), ""],
+    ["CK", cellDong(history.ckSpent), ""],
+    ["TM", cellDong(history.tmSpent), ""],
+    ["Thẻ", cellDong(history.cardSpent), ""],
+    ["Còn lại", cellDong(history.left), ""],
+    ["Dư nợ cuối tháng", history.showEndDebt ? cellDong(history.endDebt) : "—", ""]
+  ];
+  addExcelBlock(rows,"8. THU NHẬP + THU NHẬP THÊM",["Khoản mục","Số tiền","Ghi chú"], incomeRows);
+
+  const spendingRows=(plan.items||[]).map(r=>[isoToDisplay(r.dateISO||r.date||""), r.name||"", cellDong(r.amount||0), methodExportLabel(r.method), r.note||""]);
+  if(spendingRows.length){
+    spendingRows.push(excelStyledRow(["TỔNG CỘNG", "", cellDong(sumDongBy(plan.items,r=>parseDong(r.amount||0))), "", ""], "Total"));
+    spendingRows.push(["Trong đó CK", "", cellDong(sumDongBy((plan.items||[]).filter(r=>methodExportLabel(r.method)==="CK"),r=>parseDong(r.amount||0))), "", ""]);
+    spendingRows.push(["Trong đó TM", "", cellDong(sumDongBy((plan.items||[]).filter(r=>methodExportLabel(r.method)==="TM"),r=>parseDong(r.amount||0))), "", ""]);
+    spendingRows.push(["Trong đó Thẻ", "", cellDong(sumDongBy((plan.items||[]).filter(r=>methodExportLabel(r.method)==="Thẻ"),r=>parseDong(r.amount||0))), "", ""]);
+  }
+  addExcelBlock(rows,"9. CHI TIẾT CHI TIÊU",["Ngày chi","Khoản chi","Số tiền","Phân loại","Ghi chú"], spendingRows);
+
+  return {name:"Tháng đang xem", rows};
+}
+function exportAllToExcelLegacy(){
+  try{
+    save(true);
+    const used=new Set();
+    const sheet=buildCurrentMonthExcelSheet();
+    const worksheets=worksheetXmlSingle(sheet.name, sheet.rows, used);
+    const xml=`<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">
+<Styles><Style ss:ID="Header"><Font ss:Bold="1"/><Interior ss:Color="#D9EAF7" ss:Pattern="Solid"/></Style><Style ss:ID="Section"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#B7DEE8" ss:Pattern="Solid"/></Style><Style ss:ID="Total"><Font ss:Bold="1"/><Interior ss:Color="#E2F0D9" ss:Pattern="Solid"/></Style></Styles>
+${worksheets}
+</Workbook>`;
+    const blob=new Blob(["\ufeff"+xml],{type:"application/vnd.ms-excel;charset=utf-8"});
+    const a=document.createElement("a");
+    const exportMonthNum=Number(String(currentMonth||"").split("-")[1]||"");
+    const exportMonthName=exportMonthNum ? `Chi tiêu Tháng ${exportMonthNum}.xls` : "Chi tiêu Tháng đang xem.xls";
+    a.href=URL.createObjectURL(blob);
+    a.download=exportMonthName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+  }catch(err){
+    console.error(err);
+    alert("Không xuất được Excel. Mở Console để xem lỗi chi tiết.");
+  }
+}
+function loadXlsxLibrary(){
+  return new Promise((resolve,reject)=>{
+    if(window.XLSX) return resolve(window.XLSX);
+    const s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    s.async=true;
+    s.onload=()=>window.XLSX ? resolve(window.XLSX) : reject(new Error("Không tải được thư viện XLSX"));
+    s.onerror=()=>reject(new Error("Không tải được thư viện XLSX"));
+    document.head.appendChild(s);
+  });
+}
+function excelPlainValue(c){
+  if(c && c.__text!==undefined) return String(c.__text ?? "");
+  if(c && c.__type==="number") return isFinite(c.value) ? Number(c.value) : 0;
+  if(c && c.__type==="dong") return isFinite(c.value) ? Number(c.value) : 0;
+  return c ?? "";
+}
+function excelPlainRows(rows){
+  return (rows||[]).map(r=>{
+    const cells=(r && r.__cells) ? r.__cells : r;
+    return (cells||[]).map(excelPlainValue);
+  });
+}
+function excelColumnWidths(rows){
+  const colCount=Math.max(...(rows||[]).map(r=>(r||[]).length), 8);
+  const widths=[];
+  for(let c=0;c<colCount;c++){
+    let maxLen=8;
+    (rows||[]).forEach(r=>{
+      const txt=String((r||[])[c] ?? "");
+      maxLen=Math.max(maxLen, Math.min(txt.length, 28));
+    });
+    widths.push({wch:Math.max(10, Math.min(26, maxLen+2))});
+  }
+  return widths;
+}
+async function exportAllToExcel(){
+  try{
+    save(true);
+    const XLSX=await loadXlsxLibrary();
+    const sheet=buildCurrentMonthExcelSheet();
+    const rows=excelPlainRows(sheet.rows);
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"]=excelColumnWidths(rows);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Tháng đang xem");
+    const exportMonthNum=Number(String(currentMonth||"").split("-")[1]||"");
+    const exportMonthName=exportMonthNum ? `Chi tiêu Tháng ${exportMonthNum}.xlsx` : "Chi tiêu Tháng đang xem.xlsx";
+    XLSX.writeFile(wb, exportMonthName);
+  }catch(err){
+    console.warn("Xuất .xlsx không thành công, tự chuyển sang .xls dự phòng", err);
+    exportAllToExcelLegacy();
+  }
+}
+
+const undoBtn=document.getElementById("undoBtn");
+if(undoBtn) undoBtn.onclick=undo;
+const redoBtn=document.getElementById("redoBtn");
+if(redoBtn) redoBtn.onclick=redo;
+const exportExcelBtn=document.getElementById("exportExcelBtn");
+if(exportExcelBtn) exportExcelBtn.onclick=exportAllToExcel;
+const loginCloudBtn=document.getElementById("loginCloudBtn");
+if(loginCloudBtn) loginCloudBtn.onclick=loginCloud;
+const logoutCloudBtn=document.getElementById("logoutCloudBtn");
+if(logoutCloudBtn) logoutCloudBtn.onclick=logoutCloud;
+
+document.addEventListener("focusout",()=>{
+  clearTimeout(cloudSync.focusTimer);
+  cloudSync.focusTimer=setTimeout(()=>{
+    if(cloudSync.pendingRemote && !isInputActive() && !cloudSync.localDirty) deferRemoteApply(cloudSync.pendingRemote);
+  },300);
+});
+
+document.addEventListener("click",e=>{
+  const line=e.target.closest && e.target.closest("#cardPayTable .auto-source .source-line");
+  if(!line) return;
+  const box=line.closest(".auto-source");
+  if(box){
+    box.querySelectorAll(".source-line.open").forEach(el=>{ if(el!==line) el.classList.remove("open"); });
+  }
+  line.classList.toggle("open");
+});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const line=e.target.closest && e.target.closest("#cardPayTable .auto-source .source-line");
+  if(!line) return;
+  e.preventDefault();
+  line.click();
+});
+
+
+renderAll();
+initCloudSync();
+</script>
+</body>
+</html>
